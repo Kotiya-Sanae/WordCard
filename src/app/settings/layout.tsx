@@ -11,6 +11,7 @@ const titleMap: Record<string, string> = {
   "/settings/learning": "学习设置",
   "/settings/about": "关于",
   "/settings/developer": "开发者模式",
+  "/settings/data": "数据管理",
 };
 
 export default function SettingsLayout({

@@ -1,4 +1,4 @@
-# 单词卡片应用 (WordCard) - 技术方案文档
+# 单词卡片应用 (WordCard) - 技术方案文档 (v2.0)
 
 ## 1. 项目概述
 
@@ -7,7 +7,7 @@
 **核心特性:**
 - 单词卡片学习与翻转动画
 - 基于SRS的智能复习计划
-- 用户自定义词库与单词添加
+- 用户自定义词库与单词添加、编辑、删除
 - 学习进度与统计数据可视化
 - 完整的离线使用能力
 - 跨设备数据同步
@@ -16,16 +16,19 @@
 
 为了构建一个现代化、高性能且可维护的应用，我们选用以下技术栈：
 
-- **框架**: [Next.js](https://nextjs.org/) (App Router) - 提供服务器端渲染、静态站点生成、路由和API等功能。
-- **UI库**: [React](https://react.dev/) - 用于构建用户界面的核心库。
-- **样式**: [Tailwind CSS](https://tailwindcss.com/) - 一个工具类优先的CSS框架，用于快速构建自定义设计。
-- **组件库**: [Shadcn UI](https://ui.shadcn.com/) - 一套可复用、可访问的组件集合，与Tailwind CSS深度集成。
-- **图标**: [Lucide React](https://lucide.dev/) - 简洁、一致的开源图标库。
-- **代码格式化**: [Prettier](https://prettier.io/) - 保证代码风格一致性。
-- **后端服务 (BaaS)**: [Supabase](https://supabase.com/) - 提供PostgreSQL数据库、用户认证、即时API和实时数据同步功能。
-- **客户端数据库**: [Dexie.js](https://dexie.org/) - 一个对浏览器IndexedDB的友好封装，用于实现本地优先和离线功能。
-- **状态管理**: [Zustand](https://zustand-demo.pmnd.rs/) - 一个轻量、快速的全局状态管理库。
-- **打包工具**: [Capacitor](https://capacitorjs.com/) - 用于将Web应用打包成原生移动应用。
+- **框架**: [Next.js](https://nextjs.org/) **v15** (App Router)
+- **UI库**: [React](https://react.dev/) **v19**
+- **样式**: [Tailwind CSS](https://tailwindcss.com/) **v4**
+- **组件库**: [Shadcn UI](https://ui.shadcn.com/)
+- **通知组件**: [Sonner](https://sonner.emilkowal.ski/) (Toast)
+- **图表库**: [Recharts](https://recharts.org/) (通过 Shadcn Chart 封装)
+- **图标**: [Lucide React](https://lucide.dev/)
+- **代码格式化**: [Prettier](https://prettier.io/)
+- **后端服务 (BaaS)**: [Supabase](https://supabase.com/)
+  - **认证库**: **`@supabase/ssr`**
+- **客户端数据库**: [Dexie.js](https://dexie.org/)
+- **状态管理**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **打包工具**: [Capacitor](https://capacitorjs.com/)
 
 ## 3. 架构设计：本地优先 (Local-First)
 
@@ -60,200 +63,120 @@ graph LR
 
 ## 4. 数据模型
 
-### 4.1. Supabase (PostgreSQL) 数据表
+### 4.1. Dexie.js (IndexedDB) 表定义
 
-```sql
--- 用户表 (由Supabase Auth自动管理)
--- public.users
-
--- 词库表
-CREATE TABLE word_libraries (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES auth.users(id) NOT NULL,
-    name TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- 单词表
-CREATE TABLE words (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES auth.users(id) NOT NULL,
-    library_id UUID REFERENCES word_libraries(id) ON DELETE CASCADE,
-    term TEXT NOT NULL, -- 单词或短语
-    phonetic TEXT, -- 音标
-    definition TEXT NOT NULL, -- 释义
-    example TEXT, -- 例句
-    created_at TIMESTAMPTZ DEFAULT now(),
-    -- 用于同步
-    last_modified_at TIMESTAMPTZ DEFAULT now()
-);
-
--- 学习记录表 (SRS核心)
-CREATE TABLE study_records (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES auth.users(id) NOT NULL,
-    word_id UUID REFERENCES words(id) ON DELETE CASCADE,
-    -- SRS 核心字段
-    due_date TIMESTAMPTZ NOT NULL, -- 下次复习日期
-    stability INT NOT NULL DEFAULT 0, -- 稳定性 (记忆强度)
-    difficulty INT NOT NULL DEFAULT 0, -- 难度
-    review_count INT NOT NULL DEFAULT 0,
-    last_review_at TIMESTAMPTZ,
-    -- 状态: 0:待学习, 1:学习中, 2:已掌握
-    status INT NOT NULL DEFAULT 0, 
-    -- 用于同步
-    last_modified_at TIMESTAMPTZ DEFAULT now()
-);
-```
-
-### 4.2. Dexie.js (IndexedDB) 表定义
+我们采用简化的扁平化数组结构，以平衡简单性和扩展性。
 
 ```typescript
 // src/lib/db.ts
-import Dexie, { Table } from 'dexie';
 
-export interface WordLibrary {
-  id: string;
-  name: string;
-  // ...
-}
-
+// 单词接口
 export interface Word {
   id: string;
-  library_id: string;
+  libraryId: string;
   term: string;
-  phonetic?: string;
-  definition: string;
-  example?: string;
-  last_modified_at: Date;
+  phonetics: string[];   // 音标数组
+  definitions: string[]; // 释义数组
+  examples: string[];    // 独立的例句数组
+  createdAt: Date;
+  lastModifiedAt: Date;
 }
 
-export interface StudyRecord {
-  id: string;
-  word_id: string;
-  due_date: Date;
-  stability: number;
-  difficulty: number;
-  review_count: number;
-  last_review_at?: Date;
-  status: 0 | 1 | 2;
-  last_modified_at: Date;
-}
+// 其他接口... (WordLibrary, StudyRecord, Setting)
 
+// 数据库定义
 class WordCardDB extends Dexie {
-  wordLibraries!: Table<WordLibrary>;
-  words!: Table<Word>;
-  studyRecords!: Table<StudyRecord>;
-
+  // ...
   constructor() {
     super('WordCardDB');
-    this.version(1).stores({
-      wordLibraries: '&id, name',
-      words: '&id, library_id, term',
-      studyRecords: '&id, word_id, due_date, status',
-    });
+    // 版本链
+    this.version(1).stores({ /* 初始 schema */ });
+    this.version(2).stores({ /* 添加 settings 表 */ });
+    this.version(3).stores({ /* 修改 words 表 */ }).upgrade(/* ... */);
+    this.version(4).stores({ /* 为 studyRecords 添加索引 */ });
   }
 }
-
-export const db = new WordCardDB();
 ```
+
+### 4.2. Supabase (PostgreSQL) 数据表
+Supabase 的表结构将与 Dexie.js 的接口保持一致，但字段类型会映射为 PostgreSQL 类型（例如 `string[]` -> `TEXT[]`）。
 
 ## 5. 组件化方案
 
-基于UI设计稿，项目组件结构规划如下：
-
+项目组件结构已演变为：
 ```
 src/
 └── components/
-    ├── layout/
-    │   ├── Header.tsx         # 应用头部，包含标题和设置入口
-    │   └── BottomNav.tsx      # 底部导航栏
-    ├── home/
-    │   ├── DailyProgress.tsx  # 每日学习进度条
-    │   └── FlashcardPlayer.tsx# 单词卡片播放器，管理卡片状态
-    │       └── Flashcard.tsx  # 单词卡片本身，处理翻转动画
-    ├── library/
-    │   ├── WordList.tsx       # 词库列表
-    │   └── WordListItem.tsx   # 列表中的单个单词条目
     ├── add/
-    │   └── AddWordForm.tsx    # 添加/编辑单词的表单
+    │   └── AddWordForm.tsx      # 可复用的添加/编辑表单
+    ├── home/
+    │   ├── DailyProgress.tsx
+    │   ├── Flashcard.tsx
+    │   └── FlashcardPlayer.tsx
+    ├── layout/
+    │   ├── BottomNav.tsx
+    │   ├── Header.tsx
+    │   └── ThemeToggle.tsx
+    ├── library/
+    │   └── WordList.tsx         # 包含列表项和多选逻辑
+    ├── settings/
+    │   └── (多个具体设置组件)
     ├── stats/
-    │   ├── StatsSummary.tsx   # 统计总览卡片
-    │   ├── WeeklyChart.tsx    # 每周学习趋势图
-    │   └── MasteryPieChart.tsx# 掌握程度分布图
-    └── ui/                    # Shadcn UI 组件
-        ├── button.tsx
-        ├── card.tsx
-        └── ...
+    │   ├── MasteryPieChart.tsx
+    │   └── StatsSummary.tsx
+    ├── ui/                      # Shadcn UI 组件
+    └── (providers)/
+        ├── db-provider.tsx
+        └── theme-provider.tsx
 ```
 
 ## 6. 路由规划 (Next.js App Router)
 
+路由结构已演变为包含动态路由和嵌套布局的复杂结构：
 ```
 src/
 └── app/
-    ├── (main)/                # 主应用路由组，共享布局
-    │   ├── layout.tsx         # 主布局，包含Header和BottomNav
-    │   ├── page.tsx           # 首页 (学习)
-    │   ├── library/
-    │   │   └── page.tsx       # 词库页面
-    │   ├── add/
-    │   │   └── page.tsx       # 添加单词页面
-    │   ├── stats/
-    │   │   └── page.tsx       # 学习统计页面
-    │   └── settings/
-    │       └── page.tsx       # 设置页面
-    ├── auth/                  # 认证相关页面
-    │   └── ...
-    └── layout.tsx             # 根布局
+    ├── page.tsx           # 首页
+    ├── add/page.tsx
+    ├── library/
+    │   ├── page.tsx
+    │   └── [id]/edit/page.tsx # 动态编辑页
+    ├── stats/page.tsx
+    └── settings/
+        ├── layout.tsx         # 设置页的共享布局
+        ├── page.tsx           # 设置主页
+        ├── appearance/page.tsx
+        ├── learning/page.tsx
+        ├── data/page.tsx
+        ├── developer/page.tsx
+        └── about/page.tsx
 ```
 
-## 7. 核心功能实现思路
+## 7. 开发阶段回顾与展望
 
-### 7.1. 间隔重复系统 (SRS)
-- **算法**: 可以实现一个简化的FSRS（Free Spaced Repetition Scheduler）或类似Anki的SM-2算法。
-- **核心逻辑**:
-  1. 当用户对一个单词卡片做出反应（例如：`Again`, `Hard`, `Good`, `Easy`）。
-  2. 根据用户的选择，更新该单词的`stability`（记忆稳固度）和`difficulty`（难度）。
-  3. 基于新的`stability`和`difficulty`，计算出下一次最佳的复习日期 (`due_date`)。
-  4. 将更新后的`StudyRecord`保存到Dexie.js，并触发后台同步至Supabase。
-- **实现**: 在 `src/lib/srs.ts` 中封装SRS算法逻辑。
+### **阶段一：本地单机版开发 (已完成)**
 
-### 7.2. 数据同步
-- **上行 (Local -> Cloud)**:
-  - 使用Dexie.js的`"creating"`, `"updating"`, `"deleting"`钩子函数。
-  - 当本地数据发生变化时，将变更记录到一个“待同步队列”表中。
-  - 使用Web Workers或Service Workers定期检查队列，并将变更通过Supabase API推送到云端。
-- **下行 (Cloud -> Local)**:
-  - 使用Supabase的实时订阅功能 (`realtime-js`)。
-  - 订阅`words`, `study_records`等表的变化。
-  - 收到云端变更后，与本地数据进行比对（基于`last_modified_at`时间戳），并更新本地Dexie.js数据库。
+-   **[✔] 初始化与基础搭建**: 完成了项目初始化、技术栈选型与配置、依赖问题解决。
+-   **[✔] UI框架与组件**: 搭建了完整的移动端UI框架，实现了黑暗模式、Toast通知，并构建了所有核心UI组件。
+-   **[✔] 核心学习功能**: 实现了基于SRS算法的智能学习循环。
+-   **[✔] 词库管理**: 实现了完整的单词增、删、改、查（CRUD）功能，以及高效的多选批量管理。
+-   **[✔] 数据统计**: 实现了动态的数据总览和掌握程度可视化图表。
+-   **[✔] 应用设置**: 实现了可扩展的设置页面，包括外观、学习、数据管理、开发者模式和关于页面。
+-   **[✔] 数据模型**: 建立了健壮的客户端数据库，并成功完成了一次数据模型升级和迁移。
 
-## 8. 开发阶段规划
+### **阶段二：云同步与用户系统 (下一步)**
 
-1.  **阶段一：项目初始化与基础搭建 (1周)**
-    - [ ] 初始化Next.js项目，集成Tailwind CSS, Prettier, Shadcn UI。
-    - [ ] 设置Supabase项目，定义数据库表结构。
-    - [ ] 搭建基本的路由和页面布局 (`layout.tsx`, `BottomNav.tsx`)。
+-   **[ ] 实现Supabase用户认证**:
+    - [ ] 创建登录、注册、忘记密码等UI页面。
+    - [ ] 使用 `@supabase/ssr` 实现完整的用户认证流程。
+    - [ ] 实现基于Email的密码认证和（可选的）OAuth第三方登录。
+-   **[ ] 配置数据库行级安全 (RLS)**:
+    - [ ] 为所有需要用户隔离的表（`words`, `studyRecords`等）编写并启用RLS策略，确保用户只能访问自己的数据。
+-   **[ ] 实现数据同步服务**:
+    - [ ] 创建一个同步逻辑，用于在用户登录后，将云端数据拉取到本地。
+    - [ ] 改造本地的写操作（增、删、改），使其在更新本地数据库的同时，也将变更推送到Supabase。
+    - [ ] （可选）使用Supabase的实时订阅功能，实现多设备间的即时数据同步。
 
-2.  **阶段二：核心学习功能 (2周)**
-    - [ ] 实现`Flashcard`组件的翻转效果。
-    - [ ] 实现`FlashcardPlayer`组件，用于加载和管理当前学习队列。
-    - [ ] 在`src/lib/srs.ts`中实现SRS算法。
-    - [ ] 集成Dexie.js，实现单词和学习记录的本地存取。
-    - [ ] 完成首页的核心学习闭环。
-
-3.  **阶段三：词库管理与数据同步 (2周)**
-    - [ ] 完成“词库”页面，展示所有单词列表。
-    - [ ] 完成“添加/编辑单词”页面和表单。
-    - [ ] 实现Supabase用户认证。
-    - [ ] 实现本地Dexie.js与云端Supabase之间的数据同步逻辑。
-
-4.  **阶段四：统计与PWA (1周)**
-    - [ ] 完成“学习统计”页面，包括图表的可视化。
-    - [ ] 配置`next-pwa`插件，使应用具备PWA能力（可安装、离线缓存）。
-
-5.  **阶段五：打包与发布 (1周)**
-    - [ ] 集成Capacitor，将Web应用打包成iOS和Android项目。
-    - [ ] 在Xcode和Android Studio中进行调试和构建。
-    - [ ] 准备应用商店上架材料。
+### **阶段三：打包与发布 (未来)**
+-   **[ ] PWA优化**: 完善 `manifest.json` 和 Service Worker 缓存策略。
+-   **[ ] Capacitor打包**: 将应用打包成iOS和Android原生App。

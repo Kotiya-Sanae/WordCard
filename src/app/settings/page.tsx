@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Palette, Target, Info, Code } from "lucide-react";
+import { ChevronRight, Palette, Target, Info, Code, Database } from "lucide-react";
 
 const settingsItems = [
   {
@@ -13,6 +13,12 @@ const settingsItems = [
     icon: Target,
     title: "学习设置",
     description: "设定每日目标和复习计划",
+  },
+  {
+    href: "/settings/data",
+    icon: Database,
+    title: "数据管理",
+    description: "导入、导出或重置你的数据",
   },
   {
     href: "/settings/about",
