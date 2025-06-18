@@ -1,11 +1,19 @@
+import { DailyProgress } from "@/components/home/DailyProgress";
 import { FlashcardPlayer } from "@/components/home/FlashcardPlayer";
 import { Header } from "@/components/layout/Header";
-import { DailyProgress } from "@/components/home/DailyProgress";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="flex flex-col h-full">
-      <Header title="Vocabulary" />
+      <Header title="Vocabulary" user={user} />
       <DailyProgress />
 
       {/* Flashcard Player */}

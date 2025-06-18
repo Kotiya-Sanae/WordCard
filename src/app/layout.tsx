@@ -6,6 +6,8 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DBProvider } from "@/components/db-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { Suspense } from "react";
+import { WelcomeToast } from "@/components/util/WelcomeToast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -40,6 +42,9 @@ export default function RootLayout({
             </div>
           </DBProvider>
         </ThemeProvider>
+        <Suspense fallback={null}>
+          <WelcomeToast />
+        </Suspense>
         <Toaster position="top-center" />
       </body>
     </html>
