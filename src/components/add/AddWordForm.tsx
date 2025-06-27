@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { createClient } from "@/utils/supabase/client";
 
 interface AddWordFormProps {
   initialData?: Word;
@@ -40,12 +41,22 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
 
     const processToArray = (str: string) => str.split('\n').map(s => s.trim()).filter(Boolean);
 
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      toast.error("请先登录后再添加单词。");
+      setIsSubmitting(false);
+      return;
+    }
+
     const wordData = {
       term,
       phonetics: processToArray(phonetics),
       definitions: processToArray(definitions),
       examples: processToArray(examples),
       modifiedAt: new Date(),
+      userId: user.id, // 注入 userId
     };
 
     try {
@@ -57,16 +68,26 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
       } else {
         // 创建模式
         const newWordId = crypto.randomUUID();
-        await db.transaction('rw', db.words, db.studyRecords, async () => {
+        
+        // 从本地数据库获取当前用户唯一的词库
+        const userLibrary = await db.wordLibraries.toCollection().first();
+        if (!userLibrary) {
+          toast.error("无法找到您的词库，请稍后再试。");
+          setIsSubmitting(false);
+          return;
+        }
+
+        await db.transaction('rw', db.words, db.studyRecords, db.syncQueue, async () => {
           await db.words.add({
             ...wordData,
             id: newWordId,
-            libraryId: 'c8a3e5e6-3d5b-4f8e-9c1a-2b3d4e5f6a7b', // 临时 ID
+            libraryId: userLibrary.id, // 使用从本地获取的正确 libraryId
             createdAt: new Date(),
           });
           await db.studyRecords.add({
             id: crypto.randomUUID(),
             wordId: newWordId,
+            userId: user.id, // 注入 userId
             dueDate: new Date(),
             stability: 0,
             difficulty: 0,

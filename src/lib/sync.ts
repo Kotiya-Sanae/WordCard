@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/client';
 import { db } from './db';
 import { toast } from 'sonner';
+import { triggerSync } from './sync-manager';
 
 /**
  * 执行实际的下行同步逻辑。
@@ -15,7 +16,6 @@ async function performSync(): Promise<string> {
 
   console.log("开始下行同步...");
 
-  // 1. 并发从 Supabase 获取所有用户数据
   const [
     librariesRes,
     wordsRes,
@@ -33,13 +33,12 @@ async function performSync(): Promise<string> {
   if (recordsRes.error) throw recordsRes.error;
   if (settingsRes.error) throw settingsRes.error;
 
-  // 2. 显式地将从 Supabase (snake_case) 获取的数据转换为 Dexie (camelCase) 期望的格式
   const wordLibraries = librariesRes.data?.map(lib => ({
     id: lib.id,
     name: lib.name,
     createdAt: new Date(lib.created_at),
     modifiedAt: new Date(lib.modified_at),
-    userId: lib.user_id, // 确保 userId 也被转换
+    userId: lib.user_id,
   }));
 
   const words = wordsRes.data?.map(w => ({
@@ -75,7 +74,6 @@ async function performSync(): Promise<string> {
 
   console.log(`数据转换完成：获取到 ${wordLibraries?.length} 个词库, ${words?.length} 个单词, ${studyRecords?.length} 条记录, ${settings?.length} 个设置。`);
 
-  // 3. 在一个事务中，清空并批量写入转换后的数据
   await db.transaction('rw', db.wordLibraries, db.words, db.studyRecords, db.settings, async () => {
     console.log("清空本地数据表...");
     await Promise.all([
@@ -94,16 +92,12 @@ async function performSync(): Promise<string> {
     ]);
   });
 
-  // 4. 记录本次同步时间
   await db.settings.put({ key: 'lastSyncTimestamp', value: new Date().toISOString() });
   
   console.log("下行同步成功完成。");
   return "数据已成功从云端同步！";
 }
 
-/**
- * 导出的函数，它调用核心逻辑并将其包装在 toast.promise 中以提供UI反馈。
- */
 export function syncDownstream() {
   toast.promise(performSync(), {
     loading: '正在从云端同步您的数据...',
@@ -114,4 +108,90 @@ export function syncDownstream() {
       return errorMessage;
     },
   });
+}
+
+// =================================================================
+//                 上行同步处理器 (Upstream Sync Processor)
+// =================================================================
+
+function toSnakeCase(obj: any) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  return Object.keys(obj).reduce((acc, key) => {
+    const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    acc[snakeKey] = obj[key];
+    return acc;
+  }, {} as any);
+}
+
+const tableNameMap = {
+  words: 'words',
+  studyRecords: 'study_records',
+  wordLibraries: 'word_libraries',
+  settings: 'settings',
+};
+
+let isSyncing = false;
+
+export async function processSyncQueue() {
+  if (isSyncing || !navigator.onLine) {
+    return;
+  }
+
+  isSyncing = true;
+  const supabase = createClient();
+
+  try {
+    const pendingTasks = await db.syncQueue.where('status').equals('pending').toArray();
+    if (pendingTasks.length === 0) {
+      isSyncing = false;
+      return;
+    }
+
+    console.log(`开始处理同步队列，共 ${pendingTasks.length} 个任务。`);
+
+    for (const task of pendingTasks) {
+      try {
+        await db.syncQueue.update(task.id!, { status: 'syncing' });
+
+        let error;
+        const supabaseTableName = tableNameMap[task.tableName];
+        if (!supabaseTableName) {
+          throw new Error(`未知的表名: ${task.tableName}`);
+        }
+
+        switch (task.operation) {
+          case 'insert':
+            ({ error } = await supabase.from(supabaseTableName).insert(toSnakeCase(task.payload)));
+            break;
+          case 'update':
+            ({ error } = await supabase.from(supabaseTableName).update(task.payload.changes).eq('id', task.payload.id));
+            break;
+          case 'delete':
+            ({ error } = await supabase.from(supabaseTableName).delete().eq('id', task.payload.id));
+            break;
+        }
+
+        if (error) throw error;
+
+        await db.syncQueue.delete(task.id!);
+        console.log(`任务 #${task.id} (${task.operation} on ${supabaseTableName}) 同步成功。`);
+
+      } catch (error) {
+        await db.syncQueue.update(task.id!, { status: 'failed', attempts: task.attempts + 1 });
+        console.error(`任务 #${task.id} 同步失败:`, task, error);
+      }
+    }
+  } finally {
+    isSyncing = false;
+  }
+
+  const remainingTasks = await db.syncQueue.where('status').equals('pending').count();
+  if (remainingTasks > 0) {
+    console.log(`队列中还有 ${remainingTasks} 个任务，将再次尝试。`);
+    triggerSync(); // 使用 triggerSync 进行递归调用
+  } else {
+    console.log("同步队列已清空。");
+  }
 }

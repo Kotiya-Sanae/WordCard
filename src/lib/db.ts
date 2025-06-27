@@ -1,20 +1,22 @@
 import Dexie, { type Table } from 'dexie';
+import { triggerSync } from './sync-manager';
 
 // 1. 定义数据接口
 
 export interface WordLibrary {
-  id: string; // 使用UUID
+  id: string;
   name: string;
   createdAt: Date;
 }
 
 export interface Word {
-  id: string; // 使用UUID
+  id: string;
+  userId: string;
   libraryId: string;
-  term: string; // 单词或短语
-  phonetics: string[]; // 音标数组
-  definitions: string[]; // 释义数组
-  examples: string[]; // 独立的例句数组
+  term: string;
+  phonetics: string[];
+  definitions: string[];
+  examples: string[];
   createdAt: Date;
   modifiedAt: Date;
 }
@@ -22,12 +24,12 @@ export interface Word {
 export type WordStatus = 'new' | 'learning' | 'mastered';
 
 export interface StudyRecord {
-  id: string; // 使用独立的UUID
+  id: string;
   wordId: string;
-  // SRS 核心字段
-  dueDate: Date; // 下次复习日期
-  stability: number; // 稳定性 (记忆强度)
-  difficulty: number; // 难度
+  userId: string;
+  dueDate: Date;
+  stability: number;
+  difficulty: number;
   reviewCount: number;
   lastReviewAt?: Date;
   status: WordStatus;
@@ -40,10 +42,10 @@ export interface Setting {
 }
 
 export interface SyncQueueItem {
-  id?: number; // 自增主键
+  id?: number;
   operation: 'insert' | 'update' | 'delete';
   tableName: 'words' | 'studyRecords' | 'settings' | 'wordLibraries';
-  payload: any; // 对于 insert/update 是数据对象，对于 delete 是主键
+  payload: any;
   status: 'pending' | 'syncing' | 'failed';
   attempts: number;
   createdAt: Date;
@@ -64,15 +66,12 @@ class WordCardDB extends Dexie {
       words: '&id, libraryId, term',
       studyRecords: '&id, wordId, dueDate, status',
     });
-    // 升级版本以添加新表
     this.version(2).stores({
       settings: '&key',
     });
-    // 升级版本以修改 words 表
     this.version(3).stores({
-      words: '&id, libraryId, term, *phonetics, *definitions, *examples', // 为数组添加索引
+      words: '&id, libraryId, term, *phonetics, *definitions, *examples',
     }).upgrade(tx => {
-      // 迁移函数：将旧的 string 字段转换为 string[]
       return tx.table('words').toCollection().modify(word => {
         word.phonetics = word.phonetic ? [word.phonetic] : [];
         word.definitions = word.definition ? [word.definition] : [];
@@ -82,25 +81,54 @@ class WordCardDB extends Dexie {
         delete word.example;
       });
     });
-    // 升级版本以添加 studyRecords 索引
     this.version(4).stores({
       studyRecords: '&id, wordId, dueDate, status, lastReviewAt',
     });
-    // 新增版本 5，用于添加同步队列
     this.version(5).stores({
       syncQueue: '++id, status',
+    });
+
+    this.on('ready', () => {
+      this.words.hook('creating', async (primKey, obj, trans) => {
+        await db.syncQueue.add({ operation: 'insert', tableName: 'words', payload: obj, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.words.hook('updating', async (modifications, primKey, obj, trans) => {
+        await db.syncQueue.add({ operation: 'update', tableName: 'words', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.words.hook('deleting', async (primKey, obj, trans) => {
+        await db.syncQueue.add({ operation: 'delete', tableName: 'words', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+
+      this.studyRecords.hook('creating', async (primKey, obj, trans) => {
+        await db.syncQueue.add({ operation: 'insert', tableName: 'studyRecords', payload: obj, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.studyRecords.hook('updating', async (modifications, primKey, obj, trans) => {
+        await db.syncQueue.add({ operation: 'update', tableName: 'studyRecords', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.studyRecords.hook('deleting', async (primKey, obj, trans) => {
+        await db.syncQueue.add({ operation: 'delete', tableName: 'studyRecords', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
     });
   }
 }
 
-// 3. 实例化并导出
 export const db = new WordCardDB();
 
-// 4. (可选) 添加一些种子数据用于开发
 export async function populate() {
   const libraryId = 'c8a3e5e6-3d5b-4f8e-9c1a-2b3d4e5f6a7b';
   
-  // 检查是否已有数据，避免重复添加
   const count = await db.words.count();
   if (count > 0) {
     console.log("Database already populated.");
@@ -108,7 +136,6 @@ export async function populate() {
   }
 
   await db.transaction('rw', db.wordLibraries, db.words, db.studyRecords, db.settings, async () => {
-    // 添加默认设置
     await db.settings.bulkPut([
       { key: 'dailyGoal', value: 20 },
     ]);
@@ -129,6 +156,7 @@ export async function populate() {
       const wordId = crypto.randomUUID();
       await db.words.add({
         id: wordId,
+        userId: 'dev-user-id',
         libraryId: libraryId,
         term: w.term,
         phonetics: w.phonetics,
@@ -141,7 +169,8 @@ export async function populate() {
       await db.studyRecords.add({
         id: crypto.randomUUID(),
         wordId: wordId,
-        dueDate: new Date(), // 立即可以学习
+        userId: 'dev-user-id',
+        dueDate: new Date(),
         stability: 0,
         difficulty: 0,
         reviewCount: 0,

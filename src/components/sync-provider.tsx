@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { syncDownstream } from '@/lib/sync';
+import { syncDownstream, processSyncQueue } from '@/lib/sync';
 import { db } from '@/lib/db';
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
@@ -36,10 +36,17 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
+    // 监听网络状态变化，并在恢复在线时触发上行同步
+    window.addEventListener('online', processSyncQueue);
+
+    // 应用启动时，也尝试处理一次同步队列
+    processSyncQueue();
+
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('online', processSyncQueue);
     };
-  }, []); // 移除了 isInitialSyncDone，这个 effect 只需要运行一次来设置监听器
+  }, []);
 
   return <>{children}</>;
 }

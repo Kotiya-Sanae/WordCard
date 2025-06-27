@@ -57,7 +57,7 @@ function WordListItem({ item, isMultiSelectMode, isSelected, onSelect }: WordLis
 
   const handleDelete = async () => {
     try {
-      await db.transaction('rw', db.words, db.studyRecords, async () => {
+      await db.transaction('rw', db.words, db.studyRecords, db.syncQueue, async () => {
         await db.words.delete(item.id);
         if (item.record) {
           await db.studyRecords.delete(item.record.id);
@@ -184,7 +184,7 @@ export function WordList() {
 
   const handleBulkDelete = async () => {
     try {
-      await db.transaction('rw', db.words, db.studyRecords, async () => {
+      await db.transaction('rw', db.words, db.studyRecords, db.syncQueue, async () => {
         const recordsToDelete = await db.studyRecords.where('wordId').anyOf(selectedIds).toArray();
         const recordIdsToDelete = recordsToDelete.map(r => r.id);
         await db.words.bulkDelete(selectedIds);
