@@ -2,23 +2,25 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-
 import { createClient } from '@/utils/supabase/server'
+import { LoginSchema, SignupSchema } from '@/lib/schemas'
 
 export async function login(formData: FormData) {
-  const supabase = await createClient()
+  const rawFormData = Object.fromEntries(formData.entries())
+  const validationResult = LoginSchema.safeParse(rawFormData)
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  if (!validationResult.success) {
+    console.error("Login validation failed:", validationResult.error.flatten().fieldErrors);
+    // In a real app, you'd redirect with an error message
+    return redirect('/login?error=Validation failed')
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithPassword(validationResult.data)
 
   if (error) {
-    redirect('/error')
+    console.error("Login failed:", error.message);
+    return redirect('/login?error=' + encodeURIComponent(error.message))
   }
 
   revalidatePath('/', 'layout')
@@ -26,18 +28,18 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient()
+  const rawFormData = Object.fromEntries(formData.entries())
+  const validationResult = SignupSchema.safeParse(rawFormData)
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  if (!validationResult.success) {
+    console.error("Signup validation failed:", validationResult.error.flatten().fieldErrors);
+    return redirect('/login?error=Validation failed')
   }
-
+  
+  const supabase = await createClient()
   const { error } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
+    email: validationResult.data.email,
+    password: validationResult.data.password,
     options: {
       data: {
         avatar_url: '/avatars/002.png',
@@ -46,18 +48,21 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    redirect('/error')
+    console.error("Signup failed:", error.message);
+    return redirect('/login?error=' + encodeURIComponent(error.message))
   }
 
   revalidatePath('/', 'layout')
   redirect('/auth/check-email')
 }
+
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
 export async function updateAvatar(avatarUrl: string) {
   const supabase = await createClient();
 
@@ -74,7 +79,6 @@ export async function updateAvatar(avatarUrl: string) {
 
   if (error) {
     console.error('Error updating avatar:', error);
-    // Optionally redirect to an error page
     return;
   }
 

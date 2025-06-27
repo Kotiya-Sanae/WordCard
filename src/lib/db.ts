@@ -16,7 +16,7 @@ export interface Word {
   definitions: string[]; // 释义数组
   examples: string[]; // 独立的例句数组
   createdAt: Date;
-  lastModifiedAt: Date;
+  modifiedAt: Date;
 }
 
 export type WordStatus = 'new' | 'learning' | 'mastered';
@@ -31,7 +31,7 @@ export interface StudyRecord {
   reviewCount: number;
   lastReviewAt?: Date;
   status: WordStatus;
-  lastModifiedAt: Date;
+  modifiedAt: Date;
 }
 
 export interface Setting {
@@ -120,7 +120,7 @@ export async function populate() {
         definitions: w.definitions,
         examples: w.examples,
         createdAt: new Date(),
-        lastModifiedAt: new Date(),
+        modifiedAt: new Date(),
       });
 
       await db.studyRecords.add({
@@ -131,7 +131,7 @@ export async function populate() {
         difficulty: 0,
         reviewCount: 0,
         status: 'new',
-        lastModifiedAt: new Date(),
+        modifiedAt: new Date(),
       });
     }
   });

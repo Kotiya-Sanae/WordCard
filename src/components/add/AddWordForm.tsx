@@ -45,7 +45,7 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
       phonetics: processToArray(phonetics),
       definitions: processToArray(definitions),
       examples: processToArray(examples),
-      lastModifiedAt: new Date(),
+      modifiedAt: new Date(),
     };
 
     try {
@@ -72,7 +72,7 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
             difficulty: 0,
             reviewCount: 0,
             status: 'new',
-            lastModifiedAt: new Date(),
+            modifiedAt: new Date(),
           });
         });
         toast.success("单词添加成功！");
