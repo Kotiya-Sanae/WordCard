@@ -71,3 +71,65 @@
   - [ ] 使用 Supabase 的实时订阅功能 (`realtime-js`)。
   - [ ] 监听云端数据表的变化。
   - [ ] 当接收到来自其他设备的变更时，将这些变更应用到本地 Dexie.js 数据库，实现多设备间的无缝、即时同步。
+
+---
+
+## 4. 数据同步方案详细设计 (v2.0)
+
+为了确保数据同步的健壮性和可靠性，特别是在离线场景下，我们采用包含“同步队列”的增强方案。
+
+### 4.1 核心组件
+
+1.  **云端基础 (Supabase)**:
+    *   建立与本地 Dexie.js 匹配的表结构 (`word_libraries`, `words`, `study_records`, `settings`)。
+    *   为所有表配置严格的行级安全策略 (RLS)，确保用户只能访问自己的数据。
+    *   (推荐) 使用数据库触发器，在新用户注册时自动为其创建默认词库。
+
+2.  **首次数据同步 (Downstream Sync)**:
+    *   **时机**: 用户登录后，在本地数据库为空时触发。
+    *   **流程**: 从 Supabase 拉取该用户的全部数据，并使用 `bulkPut` 完全覆盖本地 Dexie.js 数据库。
+
+3.  **增量上行同步 (Upstream Sync)**:
+    *   **核心**: 引入一个新的 Dexie.js 表 `sync_queue`，用于记录所有本地的写操作（`insert`, `update`, `delete`）。
+    *   **实现**: 利用 Dexie.js 的 `creating`, `updating`, `deleting` 钩子，在本地写操作发生时，不直接调用 API，而是将变更作为一个任务写入 `sync_queue`。
+
+4.  **同步处理器 (Sync Processor)**:
+    *   **时机**: 应用启动时或网络恢复在线时 (`online` 事件) 触发。
+    *   **流程**:
+        1.  读取 `sync_queue` 中所有待处理 (`pending`) 的任务。
+        2.  按顺序执行这些任务（调用 Supabase API）。
+        3.  成功后，从队列中删除该任务。
+        4.  失败后，更新任务的尝试次数并标记为 `failed`，以便后续排查或重试。
+
+5.  **增量下行同步 (Realtime Downstream)**:
+    *   **实现**: 使用 Supabase 的实时订阅功能，监听云端数据表的变化。
+    *   **流程**: 当接收到来自其他设备的变更时，将这些变更应用到本地 Dexie.js 数据库，实现多设备间的即时同步。
+
+### 4.2 架构图
+
+```mermaid
+graph TD
+    subgraph "客户端 (本地)"
+        A[UI 操作] --> B{Dexie.js 写操作};
+        B -- "触发钩子" --> Q[写入 Sync Queue];
+        
+        subgraph "网络状态"
+            direction LR
+            NetOn[在线]
+            NetOff[离线]
+        end
+
+        P[Sync Processor] -- "读取" --> Q;
+        NetOn --> P;
+        P -- "REST API" --> S[Supabase];
+        
+        R[Realtime Subscriber] -- "更新" --> F[Dexie.js 读/写];
+        G[UI 组件] -- "useLiveQuery" --> F;
+    end
+
+    subgraph "云端"
+        S -- "实时消息" --> R;
+    end
+
+    style Q fill:#fef9c3,stroke:#f59e0b
+```

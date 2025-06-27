@@ -8,6 +8,7 @@ import { DBProvider } from "@/components/db-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { Suspense } from "react";
 import { WelcomeToast } from "@/components/util/WelcomeToast";
+import { SyncProvider } from "@/components/sync-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -36,10 +37,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <DBProvider>
-            <div className="relative w-full max-w-md mx-auto h-screen bg-background shadow-lg flex flex-col">
-              <main className="flex-1 overflow-y-auto pb-20">{children}</main>
-              <BottomNav />
-            </div>
+            <SyncProvider>
+              <div className="relative w-full max-w-md mx-auto h-screen bg-background shadow-lg flex flex-col">
+                <main className="flex-1 overflow-y-auto pb-20">{children}</main>
+                <BottomNav />
+              </div>
+            </SyncProvider>
           </DBProvider>
         </ThemeProvider>
         <Suspense fallback={null}>

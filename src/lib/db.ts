@@ -22,7 +22,7 @@ export interface Word {
 export type WordStatus = 'new' | 'learning' | 'mastered';
 
 export interface StudyRecord {
-  id: string; // 使用UUID，与Word的ID相同
+  id: string; // 使用独立的UUID
   wordId: string;
   // SRS 核心字段
   dueDate: Date; // 下次复习日期
@@ -39,12 +39,23 @@ export interface Setting {
   value: any;
 }
 
+export interface SyncQueueItem {
+  id?: number; // 自增主键
+  operation: 'insert' | 'update' | 'delete';
+  tableName: 'words' | 'studyRecords' | 'settings' | 'wordLibraries';
+  payload: any; // 对于 insert/update 是数据对象，对于 delete 是主键
+  status: 'pending' | 'syncing' | 'failed';
+  attempts: number;
+  createdAt: Date;
+}
+
 // 2. 创建数据库类
 class WordCardDB extends Dexie {
   wordLibraries!: Table<WordLibrary>;
   words!: Table<Word>;
   studyRecords!: Table<StudyRecord>;
   settings!: Table<Setting>;
+  syncQueue!: Table<SyncQueueItem>;
 
   constructor() {
     super('WordCardDB');
@@ -74,6 +85,10 @@ class WordCardDB extends Dexie {
     // 升级版本以添加 studyRecords 索引
     this.version(4).stores({
       studyRecords: '&id, wordId, dueDate, status, lastReviewAt',
+    });
+    // 新增版本 5，用于添加同步队列
+    this.version(5).stores({
+      syncQueue: '++id, status',
     });
   }
 }

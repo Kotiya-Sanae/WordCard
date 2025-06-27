@@ -23,7 +23,7 @@ export default function LoginPage() {
               输入您的邮箱和密码以登录。如果还未注册，输入您要注册的邮箱和设置的密码，点击注册
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4">
+          <CardContent className="grid gap-4 pt-4">
             <div className="grid gap-2">
               <Label htmlFor="email">邮箱</Label>
               <Input
@@ -39,7 +39,7 @@ export default function LoginPage() {
               <Input id="password" name="password" type="password" required />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4">
+          <CardFooter className="flex flex-col gap-4 pt-4">
             <Button
               formAction={login}
               className="w-full !bg-teal-500 text-white hover:!bg-teal-600"
