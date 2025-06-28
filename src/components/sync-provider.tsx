@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { syncDownstream, processSyncQueue } from '@/lib/sync';
-import { db } from '@/lib/db';
+import { db, setSyncingFromRealtime } from '@/lib/db';
 import { type AuthChangeEvent, type Session } from '@supabase/supabase-js';
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
@@ -26,34 +26,34 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     // 设置实时订阅
     const realtimeChannel = supabase.channel('public:all_tables')
       .on('postgres_changes', { event: '*', schema: 'public' },
-        (payload: RealtimePostgresChangesPayload<any>) => {
+        async (payload: RealtimePostgresChangesPayload<any>) => {
           console.log('接收到云端变更:', payload);
           const { eventType, new: newRecord, old: oldRecord, table } = payload;
 
           const convertedRecord = snakeToCamel(newRecord);
 
-          switch (table) {
-            case 'words':
-              db.transaction('rw', db.words, db.syncQueue, async (trans) => {
-                trans.custom = { source: 'realtime' }; // 打上标记
+          // 在写入前，打开“静音开关”
+          setSyncingFromRealtime(true);
+          try {
+            switch (table) {
+              case 'words':
                 if (eventType === 'INSERT' || eventType === 'UPDATE') {
                   await db.words.put(convertedRecord);
                 } else if (eventType === 'DELETE') {
                   await db.words.delete(oldRecord.id);
                 }
-              });
-              break;
-            case 'study_records':
-              db.transaction('rw', db.studyRecords, db.syncQueue, async (trans) => {
-                trans.custom = { source: 'realtime' }; // 打上标记
+                break;
+              case 'study_records':
                 if (eventType === 'INSERT' || eventType === 'UPDATE') {
                   await db.studyRecords.put(convertedRecord);
                 } else if (eventType === 'DELETE') {
                   await db.studyRecords.delete(oldRecord.id);
                 }
-              });
-              break;
-            // 可以为其他表添加 case
+                break;
+            }
+          } finally {
+            // 确保在操作完成后，无论成功与否，都关闭“静音开关”
+            setSyncingFromRealtime(false);
           }
         }
       )
