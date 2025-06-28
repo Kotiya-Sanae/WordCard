@@ -34,18 +34,22 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
           switch (table) {
             case 'words':
-              if (eventType === 'INSERT' || eventType === 'UPDATE') {
-                db.words.put(convertedRecord);
-              } else if (eventType === 'DELETE') {
-                db.words.delete(oldRecord.id);
-              }
+              db.transaction('rw', db.words, db.syncQueue, async () => {
+                if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                  await db.words.put(convertedRecord);
+                } else if (eventType === 'DELETE') {
+                  await db.words.delete(oldRecord.id);
+                }
+              });
               break;
             case 'study_records':
-              if (eventType === 'INSERT' || eventType === 'UPDATE') {
-                db.studyRecords.put(convertedRecord);
-              } else if (eventType === 'DELETE') {
-                db.studyRecords.delete(oldRecord.id);
-              }
+              db.transaction('rw', db.studyRecords, db.syncQueue, async () => {
+                if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                  await db.studyRecords.put(convertedRecord);
+                } else if (eventType === 'DELETE') {
+                  await db.studyRecords.delete(oldRecord.id);
+                }
+              });
               break;
             // 可以为其他表添加 case
           }
