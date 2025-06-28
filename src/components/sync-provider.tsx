@@ -5,10 +5,54 @@ import { createClient } from '@/utils/supabase/client';
 import { syncDownstream, processSyncQueue } from '@/lib/sync';
 import { db } from '@/lib/db';
 import { type AuthChangeEvent, type Session } from '@supabase/supabase-js';
+import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+
+// snake_case to camelCase 转换器
+function snakeToCamel(obj: any) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  return Object.keys(obj).reduce((acc, key) => {
+    const camelKey = key.replace(/_([a-z])/g, g => g[1].toUpperCase());
+    acc[camelKey] = obj[key];
+    return acc;
+  }, {} as any);
+}
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = createClient();
+
+    // 设置实时订阅
+    const realtimeChannel = supabase.channel('public:all_tables')
+      .on('postgres_changes', { event: '*', schema: 'public' },
+        (payload: RealtimePostgresChangesPayload<any>) => {
+          console.log('接收到云端变更:', payload);
+          const { eventType, new: newRecord, old: oldRecord, table } = payload;
+
+          const convertedRecord = snakeToCamel(newRecord);
+
+          switch (table) {
+            case 'words':
+              if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                db.words.put(convertedRecord);
+              } else if (eventType === 'DELETE') {
+                db.words.delete(oldRecord.id);
+              }
+              break;
+            case 'study_records':
+              if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                db.studyRecords.put(convertedRecord);
+              } else if (eventType === 'DELETE') {
+                db.studyRecords.delete(oldRecord.id);
+              }
+              break;
+            // 可以为其他表添加 case
+          }
+        }
+      )
+      .subscribe();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session) {
         console.log("用户已登录，准备执行同步检查...");
@@ -34,10 +78,12 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
+    // 监听网络状态变化，并在恢复在线时触发上行同步
     window.addEventListener('online', processSyncQueue);
     processSyncQueue();
 
     return () => {
+      supabase.removeChannel(realtimeChannel);
       subscription.unsubscribe();
       window.removeEventListener('online', processSyncQueue);
     };
