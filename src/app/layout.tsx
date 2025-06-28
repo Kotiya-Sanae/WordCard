@@ -9,7 +9,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { Suspense } from "react";
 import { WelcomeToast } from "@/components/util/WelcomeToast";
 import { SyncProvider } from "@/components/sync-provider";
-import { BrowserSupportChecker } from "@/components/util/BrowserSupportChecker";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -50,7 +49,6 @@ export default function RootLayout({
           <WelcomeToast />
         </Suspense>
         <Toaster position="top-center" />
-        <BrowserSupportChecker />
       </body>
     </html>
   );
