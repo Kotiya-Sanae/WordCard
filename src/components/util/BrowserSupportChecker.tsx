@@ -6,32 +6,29 @@ export function BrowserSupportChecker() {
   const [isUnsupported, setIsUnsupported] = useState(false);
 
   useEffect(() => {
-    // 使用更严格的、基于实际渲染结果的检测方法
+    // 最终的、基于 CSS 继承和失效机制的检测方法
     const testElement = document.createElement('div');
-    const testColor = 'rgb(0, 123, 255)'; // 一个独特的颜色值
-    const fallbackColor = 'rgb(255, 0, 0)';
-
-    // 1. 为探针元素设置一个使用 CSS 变量的样式
-    testElement.style.color = `var(--test-color, ${fallbackColor})`;
     
-    // 2. 为 body 设置这个 CSS 变量的值
-    document.body.style.setProperty('--test-color', testColor);
-    
-    // 3. 将探针元素添加到 DOM 中（但让它不可见）
+    // 1. 将探针元素添加到 DOM 中（但让它不可见）
     testElement.style.position = 'absolute';
     testElement.style.visibility = 'hidden';
     document.body.appendChild(testElement);
-    
+
+    // 2. 获取其父元素的颜色作为参照
+    const parentColor = window.getComputedStyle(document.body).color;
+
+    // 3. 为探针元素设置一个无效的 CSS 变量颜色
+    testElement.style.color = 'var(--i-do-not-exist)';
+
     // 4. 读取探针元素的最终计算颜色
     const computedColor = window.getComputedStyle(testElement).color;
-    
+
     // 5. 清理
     document.body.removeChild(testElement);
-    document.body.style.removeProperty('--test-color');
 
     // 6. 判断
-    if (computedColor !== testColor) {
-      // 如果计算出的颜色不是我们设置的变量值，说明浏览器不支持
+    // 如果浏览器不支持 CSS 变量，color 属性会失效，computedColor 会继承自父元素
+    if (computedColor === parentColor) {
       setIsUnsupported(true);
     }
   }, []);
