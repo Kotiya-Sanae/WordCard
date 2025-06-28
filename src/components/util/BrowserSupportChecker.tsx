@@ -6,29 +6,32 @@ export function BrowserSupportChecker() {
   const [isUnsupported, setIsUnsupported] = useState(false);
 
   useEffect(() => {
-    // 最终的、基于 CSS 继承和失效机制的检测方法
-    const testElement = document.createElement('div');
-    
-    // 1. 将探针元素添加到 DOM 中（但让它不可见）
-    testElement.style.position = 'absolute';
-    testElement.style.visibility = 'hidden';
-    document.body.appendChild(testElement);
+    // 最终的、基于 CSS 变量备用值 (fallback) 的检测方法
+    if (typeof window !== 'undefined' && window.CSS) {
+      // 使用一个独特的颜色值作为备用值
+      const testColor = 'rgb(1, 2, 3)';
+      
+      // 检测浏览器是否能正确处理 var() 的备用值
+      // CSS.supports('color', 'var(--a, red)') 会在所有现代浏览器中返回 true，
+      // 但我们需要检测的是渲染引擎是否真的应用了它。
+      const testElement = document.createElement('div');
+      testElement.style.color = `var(--this-variable-does-not-exist, ${testColor})`;
+      
+      // 必须将元素添加到 DOM 中才能获取到 getComputedStyle
+      testElement.style.position = 'absolute';
+      testElement.style.visibility = 'hidden';
+      document.body.appendChild(testElement);
+      
+      const computedColor = window.getComputedStyle(testElement).color;
+      
+      document.body.removeChild(testElement);
 
-    // 2. 获取其父元素的颜色作为参照
-    const parentColor = window.getComputedStyle(document.body).color;
-
-    // 3. 为探针元素设置一个无效的 CSS 变量颜色
-    testElement.style.color = 'var(--i-do-not-exist)';
-
-    // 4. 读取探针元素的最终计算颜色
-    const computedColor = window.getComputedStyle(testElement).color;
-
-    // 5. 清理
-    document.body.removeChild(testElement);
-
-    // 6. 判断
-    // 如果浏览器不支持 CSS 变量，color 属性会失效，computedColor 会继承自父元素
-    if (computedColor === parentColor) {
+      // 如果计算出的颜色不是我们设置的备用值，说明浏览器不支持
+      if (computedColor !== testColor) {
+        setIsUnsupported(true);
+      }
+    } else {
+      // 如果连 window.CSS 都不支持，那肯定是老旧浏览器
       setIsUnsupported(true);
     }
   }, []);
