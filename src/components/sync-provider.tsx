@@ -37,7 +37,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
           try {
             switch (table) {
               case 'words':
-                await db.transaction('rw', db.words, async () => {
+                await db.transaction('rw', db.words, db.syncQueue, async () => {
                   if (eventType === 'INSERT' || eventType === 'UPDATE') {
                     await db.words.put(convertedRecord);
                   } else if (eventType === 'DELETE') {
@@ -46,7 +46,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
                 });
                 break;
               case 'study_records':
-                await db.transaction('rw', db.studyRecords, async () => {
+                await db.transaction('rw', db.studyRecords, db.syncQueue, async () => {
                   if (eventType === 'INSERT' || eventType === 'UPDATE') {
                     await db.studyRecords.put(convertedRecord);
                   } else if (eventType === 'DELETE') {
