@@ -62,7 +62,9 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
     try {
       if (isEditMode) {
         // 更新模式
-        await db.words.update(initialData.id, wordData);
+        await db.transaction('rw', db.words, db.syncQueue, async () => {
+          await db.words.update(initialData.id, wordData);
+        });
         toast.success("单词更新成功！");
         router.push('/library');
       } else {

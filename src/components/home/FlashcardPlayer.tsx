@@ -46,7 +46,9 @@ export function FlashcardPlayer() {
     if (!currentItem) return;
 
     const updatedRecord = srs(currentItem.record, rating);
-    await db.studyRecords.put(updatedRecord);
+    await db.transaction('rw', db.studyRecords, db.syncQueue, async () => {
+      await db.studyRecords.put(updatedRecord);
+    });
 
     // 更新今日已学单词集合
     const newLearnedIds = new Set(learnedTodayIds).add(currentItem.word.id);

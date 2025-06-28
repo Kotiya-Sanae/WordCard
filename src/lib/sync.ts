@@ -33,7 +33,7 @@ async function performSync(): Promise<string> {
   if (recordsRes.error) throw recordsRes.error;
   if (settingsRes.error) throw settingsRes.error;
 
-  const wordLibraries = librariesRes.data?.map(lib => ({
+  const wordLibraries = librariesRes.data?.map((lib: any) => ({
     id: lib.id,
     name: lib.name,
     createdAt: new Date(lib.created_at),
@@ -41,7 +41,7 @@ async function performSync(): Promise<string> {
     userId: lib.user_id,
   }));
 
-  const words = wordsRes.data?.map(w => ({
+  const words = wordsRes.data?.map((w: any) => ({
     id: w.id,
     libraryId: w.library_id,
     term: w.term,
@@ -53,7 +53,7 @@ async function performSync(): Promise<string> {
     userId: w.user_id,
   }));
 
-  const studyRecords = recordsRes.data?.map(r => ({
+  const studyRecords = recordsRes.data?.map((r: any) => ({
     id: r.id,
     wordId: r.word_id,
     dueDate: new Date(r.due_date),
@@ -66,7 +66,7 @@ async function performSync(): Promise<string> {
     userId: r.user_id,
   }));
 
-  const settings = settingsRes.data?.map(s => ({
+  const settings = settingsRes.data?.map((s: any) => ({
     key: s.key,
     value: s.value,
     userId: s.user_id,
@@ -166,7 +166,7 @@ export async function processSyncQueue() {
             ({ error } = await supabase.from(supabaseTableName).insert(toSnakeCase(task.payload)));
             break;
           case 'update':
-            ({ error } = await supabase.from(supabaseTableName).update(task.payload.changes).eq('id', task.payload.id));
+            ({ error } = await supabase.from(supabaseTableName).update(toSnakeCase(task.payload.changes)).eq('id', task.payload.id));
             break;
           case 'delete':
             ({ error } = await supabase.from(supabaseTableName).delete().eq('id', task.payload.id));
