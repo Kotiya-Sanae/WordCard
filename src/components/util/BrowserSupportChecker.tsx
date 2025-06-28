@@ -41,7 +41,7 @@ export function BrowserSupportChecker() {
       <div>
         <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' }}>浏览器版本过低</h2>
         <p style={{ fontSize: '16px' }}>
-          抱歉，我们检测到您的浏览器版本过旧，无法完全支持本应用所需的核心技术。
+          抱歉，我们检测到您的浏览器版本过旧，无法完全支持本应用所需的核心技术（主要是CSS Variables）。例如Via浏览器，使用这类浏览器会导致严重的样式丢失。
         </p>
         <p style={{ fontSize: '16px', marginTop: '8px' }}>
           为了获得最佳体验，请使用最新版本的 Chrome、Firefox、Safari 或 Edge 浏览器。
