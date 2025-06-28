@@ -1,5 +1,14 @@
-import Dexie, { type Table } from 'dexie';
+import Dexie, { type Table, type Transaction } from 'dexie';
 import { triggerSync } from './sync-manager';
+
+// 为 Dexie 的 Transaction 接口扩展类型
+declare module 'dexie' {
+  interface Transaction {
+    custom: {
+      source?: 'realtime';
+    };
+  }
+}
 
 // 1. 定义数据接口
 
@@ -90,32 +99,38 @@ class WordCardDB extends Dexie {
 
     this.on('ready', () => {
       this.words.hook('creating', async (primKey, obj, trans) => {
+        if (trans.custom?.source === 'realtime') return;
         await db.syncQueue.add({ operation: 'insert', tableName: 'words', payload: obj, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
       });
       this.words.hook('updating', async (modifications, primKey, obj, trans) => {
+        if (trans.custom?.source === 'realtime') return;
         await db.syncQueue.add({ operation: 'update', tableName: 'words', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
       });
       this.words.hook('deleting', async (primKey, obj, trans) => {
+        if (trans.custom?.source === 'realtime') return;
         await db.syncQueue.add({ operation: 'delete', tableName: 'words', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
       });
 
       this.studyRecords.hook('creating', async (primKey, obj, trans) => {
+        if (trans.custom?.source === 'realtime') return;
         await db.syncQueue.add({ operation: 'insert', tableName: 'studyRecords', payload: obj, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
       });
       this.studyRecords.hook('updating', async (modifications, primKey, obj, trans) => {
+        if (trans.custom?.source === 'realtime') return;
         await db.syncQueue.add({ operation: 'update', tableName: 'studyRecords', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
       });
       this.studyRecords.hook('deleting', async (primKey, obj, trans) => {
+        if (trans.custom?.source === 'realtime') return;
         await db.syncQueue.add({ operation: 'delete', tableName: 'studyRecords', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;

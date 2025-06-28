@@ -34,7 +34,8 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
 
           switch (table) {
             case 'words':
-              db.transaction('rw', db.words, db.syncQueue, async () => {
+              db.transaction('rw', db.words, db.syncQueue, async (trans) => {
+                trans.custom = { source: 'realtime' }; // 打上标记
                 if (eventType === 'INSERT' || eventType === 'UPDATE') {
                   await db.words.put(convertedRecord);
                 } else if (eventType === 'DELETE') {
@@ -43,7 +44,8 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
               });
               break;
             case 'study_records':
-              db.transaction('rw', db.studyRecords, db.syncQueue, async () => {
+              db.transaction('rw', db.studyRecords, db.syncQueue, async (trans) => {
+                trans.custom = { source: 'realtime' }; // 打上标记
                 if (eventType === 'INSERT' || eventType === 'UPDATE') {
                   await db.studyRecords.put(convertedRecord);
                 } else if (eventType === 'DELETE') {
