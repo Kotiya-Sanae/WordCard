@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-import { db } from './db';
+import { db, setSyncingFromRealtime } from './db';
 import { toast } from 'sonner';
 import { triggerSync } from './sync-manager';
 
@@ -74,23 +74,30 @@ async function performSync(): Promise<string> {
 
   console.log(`数据转换完成：获取到 ${wordLibraries?.length} 个词库, ${words?.length} 个单词, ${studyRecords?.length} 条记录, ${settings?.length} 个设置。`);
 
-  await db.transaction('rw', db.wordLibraries, db.words, db.studyRecords, db.settings, async () => {
-    console.log("清空本地数据表...");
-    await Promise.all([
-      db.wordLibraries.clear(),
-      db.words.clear(),
-      db.studyRecords.clear(),
-      db.settings.clear(),
-    ]);
+  // 在写入前，打开“静音开关”
+  setSyncingFromRealtime(true);
+  try {
+    await db.transaction('rw', db.wordLibraries, db.words, db.studyRecords, db.settings, async () => {
+      console.log("清空本地数据表...");
+      await Promise.all([
+        db.wordLibraries.clear(),
+        db.words.clear(),
+        db.studyRecords.clear(),
+        db.settings.clear(),
+      ]);
 
-    console.log("批量写入新数据到本地...");
-    await Promise.all([
-      db.wordLibraries.bulkPut(wordLibraries || []),
-      db.words.bulkPut(words || []),
-      db.studyRecords.bulkPut(studyRecords || []),
-      db.settings.bulkPut(settings || []),
-    ]);
-  });
+      console.log("批量写入新数据到本地...");
+      await Promise.all([
+        db.wordLibraries.bulkPut(wordLibraries || []),
+        db.words.bulkPut(words || []),
+        db.studyRecords.bulkPut(studyRecords || []),
+        db.settings.bulkPut(settings || []),
+      ]);
+    });
+  } finally {
+    // 确保在操作完成后关闭“静音开关”
+    setSyncingFromRealtime(false);
+  }
 
   await db.settings.put({ key: 'lastSyncTimestamp', value: new Date().toISOString() });
   
@@ -190,7 +197,7 @@ export async function processSyncQueue() {
   const remainingTasks = await db.syncQueue.where('status').equals('pending').count();
   if (remainingTasks > 0) {
     console.log(`队列中还有 ${remainingTasks} 个任务，将再次尝试。`);
-    triggerSync(); // 使用 triggerSync 进行递归调用
+    triggerSync();
   } else {
     console.log("同步队列已清空。");
   }
