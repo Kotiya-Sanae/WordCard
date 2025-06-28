@@ -14,8 +14,15 @@ import ServiceWorkerRegistrar from "@/components/util/ServiceWorkerRegistrar";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
+  manifest: "/manifest.json",
   title: "WordCard - 你的单词记忆助手",
   description: "一个使用Next.js构建的现代单词卡片应用",
+  themeColor: "#000000",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "WordCard",
+  },
 };
 
 export default function RootLayout({
