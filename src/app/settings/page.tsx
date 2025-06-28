@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRight, Palette, Target, Info, Code, Database } from "lucide-react";
+import InstallPrompt from "@/components/util/InstallPrompt";
 
 const settingsItems = [
   {
@@ -36,10 +37,12 @@ const settingsItems = [
 
 export default function SettingsPage() {
   return (
-    <div className="p-4">
-      <ul className="space-y-2">
-        {settingsItems.map((item) => (
-          <li key={item.href}>
+    <div>
+      <InstallPrompt />
+      <div className="p-4">
+        <ul className="space-y-2">
+          {settingsItems.map((item) => (
+            <li key={item.href}>
             <Link
               href={item.href}
               className="flex items-center justify-between p-4 rounded-lg hover:bg-muted"
@@ -57,7 +60,8 @@ export default function SettingsPage() {
             </Link>
           </li>
         ))}
-      </ul>
+        </ul>
+      </div>
     </div>
   );
 }
