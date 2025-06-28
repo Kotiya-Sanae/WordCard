@@ -73,6 +73,6 @@ export function srs(record: StudyRecord, rating: Rating): StudyRecord {
     status: nextStatus,
     reviewCount: reviewCount + 1,
     lastReviewAt: now,
-    lastModifiedAt: now,
+    modifiedAt: now,
   };
 }
