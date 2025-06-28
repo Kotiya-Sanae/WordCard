@@ -106,6 +106,10 @@ class WordCardDB extends Dexie {
       });
       this.words.hook('updating', async (modifications, primKey, obj, trans) => {
         if (trans.custom?.source === 'realtime') return;
+        const keys = Object.keys(modifications);
+        if (keys.length === 1 && keys[0] === 'modifiedAt') {
+          return;
+        }
         await db.syncQueue.add({ operation: 'update', tableName: 'words', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
@@ -125,6 +129,10 @@ class WordCardDB extends Dexie {
       });
       this.studyRecords.hook('updating', async (modifications, primKey, obj, trans) => {
         if (trans.custom?.source === 'realtime') return;
+        const keys = Object.keys(modifications);
+        if (keys.length === 1 && keys[0] === 'modifiedAt') {
+          return;
+        }
         await db.syncQueue.add({ operation: 'update', tableName: 'studyRecords', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
