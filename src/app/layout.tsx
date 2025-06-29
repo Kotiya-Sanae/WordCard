@@ -11,6 +11,7 @@ import { WelcomeToast } from "@/components/util/WelcomeToast";
 import { SyncProvider } from "@/components/sync-provider";
 import ServiceWorkerRegistrar from "@/components/util/ServiceWorkerRegistrar";
 import { Analytics } from "@vercel/analytics/next";
+import GoogleAnalytics from "@/components/util/GoogleAnalytics";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -60,6 +61,7 @@ export default function RootLayout({
         <Toaster position="top-center" />
         <ServiceWorkerRegistrar />
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );
