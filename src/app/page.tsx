@@ -13,7 +13,7 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col h-full">
-      <Header title="Vocabulary" user={user} />
+      <Header title="WordCard" user={user} />
       <DailyProgress />
 
       {/* Flashcard Player */}

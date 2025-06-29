@@ -20,7 +20,7 @@ export default function AboutPage() {
           </div>
           <div className="flex justify-between">
             <span>开发者</span>
-            <span>Roo</span>
+            <span>发呆猫DazingCat</span>
           </div>
         </CardContent>
       </Card>
