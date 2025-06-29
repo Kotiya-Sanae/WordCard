@@ -10,6 +10,7 @@ import { Suspense } from "react";
 import { WelcomeToast } from "@/components/util/WelcomeToast";
 import { SyncProvider } from "@/components/sync-provider";
 import ServiceWorkerRegistrar from "@/components/util/ServiceWorkerRegistrar";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -35,7 +36,7 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          inter.variable
+          inter.variable,
         )}
       >
         <ThemeProvider
@@ -58,6 +59,7 @@ export default function RootLayout({
         </Suspense>
         <Toaster position="top-center" />
         <ServiceWorkerRegistrar />
+        <Analytics />
       </body>
     </html>
   );
