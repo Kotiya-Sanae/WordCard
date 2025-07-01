@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { syncDownstream, processSyncQueue } from '@/lib/sync';
 import { db, setSyncingFromRealtime } from '@/lib/db';
 import { type AuthChangeEvent, type Session } from '@supabase/supabase-js';
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import GoogleAnalytics from './util/GoogleAnalytics';
 
 // snake_case to camelCase 转换器
 function snakeToCamel(obj: any) {
@@ -20,6 +21,8 @@ function snakeToCamel(obj: any) {
 }
 
 export function SyncProvider({ children }: { children: React.ReactNode }) {
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+
   useEffect(() => {
     const supabase = createClient();
 
@@ -66,6 +69,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session) {
         console.log("用户已登录，准备执行同步检查...");
+        setUserId(session.user.id);
         
         const lastSync = await db.settings.get('lastSyncTimestamp');
         
@@ -76,6 +80,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
             console.log(`本地数据已于 ${lastSync.value} 同步，跳过首次同步。`);
         }
       } else if (event === 'SIGNED_OUT') {
+        setUserId(undefined);
         console.log("用户已登出，正在清除本地数据...");
         await Promise.all([
           db.wordLibraries.clear(),
@@ -99,5 +104,10 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <GoogleAnalytics userId={userId} />
+    </>
+  );
 }

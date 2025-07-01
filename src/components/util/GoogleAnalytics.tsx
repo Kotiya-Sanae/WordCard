@@ -2,7 +2,11 @@
 
 import Script from "next/script";
 
-const GoogleAnalytics = () => {
+interface GoogleAnalyticsProps {
+  userId?: string;
+}
+
+const GoogleAnalytics = ({ userId }: GoogleAnalyticsProps) => {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   if (!gaMeasurementId) {
@@ -25,6 +29,7 @@ const GoogleAnalytics = () => {
             gtag('js', new Date());
             gtag('config', '${gaMeasurementId}', {
               page_path: window.location.pathname,
+              ${userId ? `user_id: '${userId}'` : ""}
             });
           `,
         }}
