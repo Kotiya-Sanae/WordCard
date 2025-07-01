@@ -110,23 +110,24 @@ export function MasteryPieChart() {
               <Label
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    const { cx, cy } = viewBox as { cx: number; cy: number };
                     return (
                       <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
+                        x={cx}
+                        y={cy}
                         textAnchor="middle"
                         dominantBaseline="middle"
                       >
                         <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
+                          x={cx}
+                          y={cy}
                           className="fill-foreground text-3xl font-bold"
                         >
                           {stats.total.toLocaleString()}
                         </tspan>
                         <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
+                          x={cx}
+                          y={(cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
                           总计
