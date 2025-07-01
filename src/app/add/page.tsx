@@ -1,12 +1,14 @@
-import { AddWordForm } from "@/components/add/AddWordForm";
+"use client";
 
-export default function AddWordPage() {
-  return (
-    <div>
-      <div className="p-4 border-b">
-        <h1 className="text-xl font-bold text-center">添加新单词</h1>
-      </div>
-      <AddWordForm />
-    </div>
-  );
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function AddPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/add/manual");
+  }, [router]);
+
+  return null; // 或者可以显示一个加载指示器
 }

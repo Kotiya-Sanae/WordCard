@@ -1,0 +1,706 @@
+{
+  "library": {
+    "name": "CET-4 高频词汇",
+    "description": "大学英语四级考试核心词汇。",
+    "category": "内置",
+    "wordCount": 116
+  },
+  "words": [
+    {
+      "term": "abandon",
+      "phonetics": ["əˈbændən"],
+      "definitions": ["v. 放弃，抛弃"],
+      "examples": ["He had to abandon his hope of becoming a doctor.","He abandoned his car in the snowstorm."]
+    },
+    {
+      "term": "benefit",
+      "phonetics": ["ˈbɛnɪfɪt"],
+      "definitions": ["n. 利益 v. 受益"],
+      "examples": ["This program benefits millions of people."]
+    },
+    {
+      "term": "consequence",
+      "phonetics": ["ˈkɒnsɪkwəns"],
+      "definitions": ["n. 结果，后果"],
+      "examples": ["Your decision will have serious consequences."]
+    },
+    {
+      "term": "dilemma",
+      "phonetics": ["dɪˈlɛmə"],
+      "definitions": ["n. 困境，进退两难"],
+      "examples": ["She faced a moral dilemma."]
+    },
+    {
+      "term": "efficient",
+      "phonetics": ["ɪˈfɪʃ(ə)nt"],
+      "definitions": ["adj. 有效率的"],
+      "examples": ["The new system is more efficient."]
+    },
+    {
+      "term": "frustrate",
+      "phonetics": ["frʌˈstreɪt"],
+      "definitions": ["v. 挫败，使沮丧"],
+      "examples": ["The difficult problem frustrated him."]
+    },
+    {
+      "term": "genuine",
+      "phonetics": ["ˈdʒɛnjʊɪn"],
+      "definitions": ["adj. 真正的，真实的"],
+      "examples": ["She showed genuine interest in the project."]
+    },
+    {
+      "term": "humble",
+      "phonetics": ["ˈhʌmb(ə)l"],
+      "definitions": ["adj. 谦逊的 v. 使谦恭"],
+      "examples": ["Despite his success, he remained humble."]
+    },
+    {
+      "term": "ignorant",
+      "phonetics": ["ˈɪɡnərənt"],
+      "definitions": ["adj. 无知的"],
+      "examples": ["He was ignorant of the basic facts."]
+    },
+    {
+      "term": "jealous",
+      "phonetics": ["ˈdʒɛləs"],
+      "definitions": ["adj. 嫉妒的"],
+      "examples": ["She felt jealous of her friend's success."]
+    },
+    {
+      "term": "keen",
+      "phonetics": ["kiːn"],
+      "definitions": ["adj. 敏锐的，热切的"],
+      "examples": ["He has a keen interest in astronomy."]
+    },
+    {
+      "term": "linger",
+      "phonetics": ["ˈlɪŋɡə"],
+      "definitions": ["v. 逗留，徘徊"],
+      "examples": ["The smell lingered in the room."]
+    },
+    {
+      "term": "modest",
+      "phonetics": ["ˈmɒdɪst"],
+      "definitions": ["adj. 谦虚的，适度的"],
+      "examples": ["She was modest about her achievements."]
+    },
+    {
+      "term": "negative",
+      "phonetics": ["ˈnɛɡətɪv"],
+      "definitions": ["adj. 消极的，否定的"],
+      "examples": ["His attitude was very negative."]
+    },
+    {
+      "term": "obstacle",
+      "phonetics": ["ˈɒbstək(ə)l"],
+      "definitions": ["n. 障碍"],
+      "examples": ["Lack of education is a major obstacle."]
+    },
+    {
+      "term": "peculiar",
+      "phonetics": ["pɪˈkjuːlɪə"],
+      "definitions": ["adj. 奇怪的，特有的"],
+      "examples": ["There was a peculiar smell in the kitchen."]
+    },
+    {
+      "term": "qualify",
+      "phonetics": ["ˈkwɒlɪfaɪ"],
+      "definitions": ["v. 使具有资格"],
+      "examples": ["This course qualifies you to teach."]
+    },
+    {
+      "term": "radical",
+      "phonetics": ["ˈrædɪk(ə)l"],
+      "definitions": ["adj. 根本的，激进的"],
+      "examples": ["We need radical changes in the system."]
+    },
+    {
+      "term": "sincere",
+      "phonetics": ["sɪnˈsɪə"],
+      "definitions": ["adj. 真诚的"],
+      "examples": ["Please accept our sincere apologies."]
+    },
+    {
+      "term": "temporary",
+      "phonetics": ["ˈtɛmp(ə)rəri"],
+      "definitions": ["adj. 暂时的"],
+      "examples": ["This is just a temporary solution."]
+    },
+    {
+      "term": "urgent",
+      "phonetics": ["ˈɜːdʒ(ə)nt"],
+      "definitions": ["adj. 紧急的"],
+      "examples": ["There's an urgent message for you."]
+    },
+    {
+      "term": "vague",
+      "phonetics": ["veɪɡ"],
+      "definitions": ["adj. 模糊的"],
+      "examples": ["His instructions were very vague."]
+    },
+    {
+      "term": "witness",
+      "phonetics": ["ˈwɪtnəs"],
+      "definitions": ["n. 目击者 v. 见证"],
+      "examples": ["She witnessed the accident."]
+    },
+    {
+      "term": "yield",
+      "phonetics": ["jiːld"],
+      "definitions": ["v. 生产，屈服 n. 产量"],
+      "examples": ["The tree yields delicious fruit."]
+    },
+    {
+      "term": "zealous",
+      "phonetics": ["ˈzɛləs"],
+      "definitions": ["adj. 热心的"],
+      "examples": ["He was zealous in his work."]
+    },
+    {
+      "term": "accumulate",
+      "phonetics": ["əˈkjuːmjʊleɪt"],
+      "definitions": ["v. 积累"],
+      "examples": ["Dust had accumulated on the shelves."]
+    },
+    {
+      "term": "brilliant",
+      "phonetics": ["ˈbrɪljənt"],
+      "definitions": ["adj. 灿烂的，杰出的"],
+      "examples": ["She gave a brilliant performance."]
+    },
+    {
+      "term": "controversial",
+      "phonetics": ["kɒntrəˈvɜːʃ(ə)l"],
+      "definitions": ["adj. 有争议的"],
+      "examples": ["This is a controversial decision."]
+    },
+    {
+      "term": "dramatic",
+      "phonetics": ["drəˈmætɪk"],
+      "definitions": ["adj. 戏剧性的"],
+      "examples": ["There was a dramatic change in weather."]
+    },
+    {
+      "term": "exhaust",
+      "phonetics": ["ɪɡˈzɔːst"],
+      "definitions": ["v. 耗尽 n. 废气"],
+      "examples": ["The long journey exhausted us."]
+    },
+    {
+      "term": "fascinate",
+      "phonetics": ["ˈfæsɪneɪt"],
+      "definitions": ["v. 使着迷"],
+      "examples": ["Space exploration fascinates me."]
+    },
+    {
+      "term": "gratitude",
+      "phonetics": ["ˈɡrætɪtjuːd"],
+      "definitions": ["n. 感激"],
+      "examples": ["I expressed my gratitude for their help."]
+    },
+    {
+      "term": "hostile",
+      "phonetics": ["ˈhɒstaɪl"],
+      "definitions": ["adj. 敌对的"],
+      "examples": ["He faced hostile questioning."]
+    },
+    {
+      "term": "identical",
+      "phonetics": ["aɪˈdɛntɪk(ə)l"],
+      "definitions": ["adj. 完全相同的"],
+      "examples": ["The twins are nearly identical."]
+    },
+    {
+      "term": "junior",
+      "phonetics": ["ˈdʒuːnɪə"],
+      "definitions": ["adj. 年少的 n. 晚辈"],
+      "examples": ["He is three years junior to me."]
+    },
+    {
+      "term": "knit",
+      "phonetics": ["nɪt"],
+      "definitions": ["v. 编织，结合"],
+      "examples": ["She knitted a sweater for her grandson."]
+    },
+    {
+      "term": "leak",
+      "phonetics": ["liːk"],
+      "definitions": ["v. 泄漏 n. 漏洞"],
+      "examples": ["The roof leaks when it rains."]
+    },
+    {
+      "term": "mature",
+      "phonetics": ["məˈtjʊə"],
+      "definitions": ["adj. 成熟的 v. 成熟"],
+      "examples": ["This cheese needs time to mature."]
+    },
+    {
+      "term": "neutral",
+      "phonetics": ["ˈnjuːtrəl"],
+      "definitions": ["adj. 中立的"],
+      "examples": ["Switzerland remained neutral in the war."]
+    },
+    {
+      "term": "oblige",
+      "phonetics": ["əˈblaɪdʒ"],
+      "definitions": ["v. 迫使，施恩惠"],
+      "examples": ["The law obliges parents to send children to school."]
+    },
+    {
+      "term": "parallel",
+      "phonetics": ["ˈparəlɛl"],
+      "definitions": ["adj. 平行的 n. 相似物"],
+      "examples": ["The road runs parallel to the river."]
+    },
+    {
+      "term": "quit",
+      "phonetics": ["kwɪt"],
+      "definitions": ["v. 停止，辞职"],
+      "examples": ["He quit smoking last year."]
+    },
+    {
+      "term": "rebel",
+      "phonetics": ["ˈrɛb(ə)l"],
+      "definitions": ["n. 反叛者 v. 反抗"],
+      "examples": ["Teenagers often rebel against their parents."]
+    },
+    {
+      "term": "scatter",
+      "phonetics": ["ˈskætə"],
+      "definitions": ["v. 分散，散播"],
+      "examples": ["The crowd scattered when police arrived."]
+    },
+    {
+      "term": "tremble",
+      "phonetics": ["ˈtrɛmb(ə)l"],
+      "definitions": ["v. 颤抖"],
+      "examples": ["Her voice trembled with emotion."]
+    },
+    {
+      "term": "ultimate",
+      "phonetics": ["ˈʌltɪmət"],
+      "definitions": ["adj. 最终的，根本的"],
+      "examples": ["The ultimate goal is world peace."]
+    },
+    {
+      "term": "vanish",
+      "phonetics": ["ˈvanɪʃ"],
+      "definitions": ["v. 消失"],
+      "examples": ["The magician made the rabbit vanish."]
+    },
+    {
+      "term": "withstand",
+      "phonetics": ["wɪðˈstand"],
+      "definitions": ["v. 承受，抵抗"],
+      "examples": ["This material can withstand high temperatures."]
+    },
+    {
+      "term": "ancient",
+      "phonetics": ["ˈeɪnʃ(ə)nt"],
+      "definitions": ["adj. 古代的"],
+      "examples": ["We studied ancient Greek history."]
+    },
+    {
+      "term": "bold",
+      "phonetics": ["bəʊld"],
+      "definitions": ["adj. 大胆的"],
+      "examples": ["She made a bold decision to quit her job."]
+    },
+    {
+      "term": "casual",
+      "phonetics": ["ˈkaʒjʊəl"],
+      "definitions": ["adj. 偶然的，随便的"],
+      "examples": ["He wore casual clothes to the party."]
+    },
+    {
+      "term": "deceive",
+      "phonetics": ["dɪˈsiːv"],
+      "definitions": ["v. 欺骗"],
+      "examples": ["Don't deceive yourself about the situation."]
+    },
+    {
+      "term": "elaborate",
+      "phonetics": ["ɪˈlab(ə)rət"],
+      "definitions": ["adj. 精心制作的 v. 详细说明"],
+      "examples": ["She made elaborate preparations for the party."]
+    },
+    {
+      "term": "fierce",
+      "phonetics": ["fɪəs"],
+      "definitions": ["adj. 凶猛的，激烈的"],
+      "examples": ["There was fierce competition for the job."]
+    },
+    {
+      "term": "glimpse",
+      "phonetics": ["ɡlɪmps"],
+      "definitions": ["n. 一瞥 v. 瞥见"],
+      "examples": ["I caught a glimpse of the famous actor."]
+    },
+    {
+      "term": "harsh",
+      "phonetics": ["hɑːʃ"],
+      "definitions": ["adj. 严厉的，刺耳的"],
+      "examples": ["The punishment seemed too harsh."]
+    },
+    {
+      "term": "inferior",
+      "phonetics": ["ɪnˈfɪərɪə"],
+      "definitions": ["adj. 下等的，较差的"],
+      "examples": ["These products are of inferior quality."]
+    },
+    {
+      "term": "jolly",
+      "phonetics": ["ˈdʒɒli"],
+      "definitions": ["adj. 愉快的"],
+      "examples": ["We had a jolly time at the picnic."]
+    },
+    {
+      "term": "linger",
+      "phonetics": ["ˈlɪŋɡə"],
+      "definitions": ["v. 逗留，拖延"],
+      "examples": ["The smell of her perfume lingered in the room."]
+    },
+    {
+      "term": "magnificent",
+      "phonetics": ["maɡˈnɪfɪs(ə)nt"],
+      "definitions": ["adj. 壮丽的"],
+      "examples": ["We visited a magnificent palace."]
+    },
+    {
+      "term": "nonsense",
+      "phonetics": ["ˈnɒns(ə)ns"],
+      "definitions": ["n. 胡说"],
+      "examples": ["That's complete nonsense!"]
+    },
+    {
+      "term": "optimistic",
+      "phonetics": ["ɒptɪˈmɪstɪk"],
+      "definitions": ["adj. 乐观的"],
+      "examples": ["She's optimistic about the future."]
+    },
+    {
+      "term": "persist",
+      "phonetics": ["pəˈsɪst"],
+      "definitions": ["v. 坚持，持续"],
+      "examples": ["If symptoms persist, consult a doctor."]
+    },
+    {
+      "term": "quarrel",
+      "phonetics": ["ˈkwɒr(ə)l"],
+      "definitions": ["n. 争吵 v. 吵架"],
+      "examples": ["They had a quarrel about money."]
+    },
+    {
+      "term": "remedy",
+      "phonetics": ["ˈrɛmɪdi"],
+      "definitions": ["n. 治疗法 v. 补救"],
+      "examples": ["There's no simple remedy for this problem."]
+    },
+    {
+      "term": "sorrow",
+      "phonetics": ["ˈsɒrəʊ"],
+      "definitions": ["n. 悲哀"],
+      "examples": ["She felt deep sorrow at the news."]
+    },
+    {
+      "term": "thrust",
+      "phonetics": ["θrʌst"],
+      "definitions": ["v. 猛推 n. 推力"],
+      "examples": ["He thrust the money into my hand."]
+    },
+    {
+      "term": "unite",
+      "phonetics": ["juːˈnaɪt"],
+      "definitions": ["v. 联合"],
+      "examples": ["The two companies will unite next month."]
+    },
+    {
+      "term": "vibrate",
+      "phonetics": ["vaɪˈbreɪt"],
+      "definitions": ["v. 振动"],
+      "examples": ["The phone vibrated in his pocket."]
+    },
+    {
+      "term": "whisper",
+      "phonetics": ["ˈwɪspə"],
+      "definitions": ["v. 耳语 n. 低语"],
+      "examples": ["She whispered the secret in my ear."]
+    },
+    {
+      "term": "ambition",
+      "phonetics": ["æmˈbɪʃ(ə)n"],
+      "definitions": ["n. 雄心"],
+      "examples": ["Her ambition is to become CEO."]
+    },
+    {
+      "term": "bother",
+      "phonetics": ["ˈbɒðə"],
+      "definitions": ["v. 打扰 n. 麻烦"],
+      "examples": ["Don't bother me while I'm working."]
+    },
+    {
+      "term": "compel",
+      "phonetics": ["kəmˈpel"],
+      "definitions": ["v. 强迫"],
+      "examples": ["The law compels companies to disclose this information."]
+    },
+    {
+      "term": "dense",
+      "phonetics": ["dɛns"],
+      "definitions": ["adj. 密集的"],
+      "examples": ["The forest was too dense to walk through."]
+    },
+    {
+      "term": "eager",
+      "phonetics": ["ˈiːɡə"],
+      "definitions": ["adj. 热切的"],
+      "examples": ["He was eager to start his new job."]
+    },
+    {
+      "term": "frown",
+      "phonetics": ["fraʊn"],
+      "definitions": ["v. 皱眉 n. 皱眉"],
+      "examples": ["She frowned when she saw the mess."]
+    },
+    {
+      "term": "grasp",
+      "phonetics": ["ɡrɑːsp"],
+      "definitions": ["v. 抓住，理解 n. 把握"],
+      "examples": ["He grasped the rope tightly."]
+    },
+    {
+      "term": "hollow",
+      "phonetics": ["ˈhɒləʊ"],
+      "definitions": ["adj. 中空的"],
+      "examples": ["The tree trunk was hollow inside."]
+    },
+    {
+      "term": "incredible",
+      "phonetics": ["ɪnˈkrɛdɪb(ə)l"],
+      "definitions": ["adj. 难以置信的"],
+      "examples": ["The view was absolutely incredible."]
+    },
+    {
+      "term": "justice",
+      "phonetics": ["ˈdʒʌstɪs"],
+      "definitions": ["n. 正义，司法"],
+      "examples": ["They fought for social justice."]
+    },
+    {
+      "term": "kneel",
+      "phonetics": ["niːl"],
+      "definitions": ["v. 跪下"],
+      "examples": ["He knelt down to tie his shoe."]
+    },
+    {
+      "term": "leap",
+      "phonetics": ["liːp"],
+      "definitions": ["v. 跳跃 n. 飞跃"],
+      "examples": ["The cat leaped onto the table."]
+    },
+    {
+      "term": "miserable",
+      "phonetics": ["ˈmɪz(ə)rəb(ə)l"],
+      "definitions": ["adj. 痛苦的"],
+      "examples": ["The refugees were living in miserable conditions."]
+    },
+    {
+      "term": "nourish",
+      "phonetics": ["ˈnʌrɪʃ"],
+      "definitions": ["v. 滋养"],
+      "examples": ["This soup will nourish you."]
+    },
+    {
+      "term": "offend",
+      "phonetics": ["əˈfɛnd"],
+      "definitions": ["v. 冒犯"],
+      "examples": ["I didn't mean to offend you."]
+    },
+    {
+      "term": "panic",
+      "phonetics": ["ˈpanɪk"],
+      "definitions": ["n. 恐慌 v. 惊慌"],
+      "examples": ["There was panic when the fire started."]
+    },
+    {
+      "term": "queue",
+      "phonetics": ["kjuː"],
+      "definitions": ["n. 队列 v. 排队"],
+      "examples": ["We had to queue for tickets."]
+    },
+    {
+      "term": "reluctant",
+      "phonetics": ["rɪˈlʌkt(ə)nt"],
+      "definitions": ["adj. 不情愿的"],
+      "examples": ["He was reluctant to admit his mistake."]
+    },
+    {
+      "term": "splendid",
+      "phonetics": ["ˈsplɛndɪd"],
+      "definitions": ["adj. 辉煌的"],
+      "examples": ["We had a splendid vacation."]
+    },
+    {
+      "term": "tolerate",
+      "phonetics": ["ˈtɒləreɪt"],
+      "definitions": ["v. 容忍"],
+      "examples": ["I won't tolerate such behavior."]
+    },
+    {
+      "term": "upset",
+      "phonetics": ["ʌpˈsɛt"],
+      "definitions": ["v. 使不安 adj. 心烦的"],
+      "examples": ["The bad news upset her."]
+    },
+    {
+      "term": "vital",
+      "phonetics": ["ˈvaɪt(ə)l"],
+      "definitions": ["adj. 至关重要的"],
+      "examples": ["This is a vital decision for our company."]
+    },
+    {
+      "term": "wander",
+      "phonetics": ["ˈwɒndə"],
+      "definitions": ["v. 漫步"],
+      "examples": ["She wandered through the streets aimlessly."]
+    },
+    {
+      "term": "abrupt",
+      "phonetics": ["əˈbrʌpt"],
+      "definitions": ["adj. 突然的"],
+      "examples": ["The meeting came to an abrupt end."]
+    },
+    {
+      "term": "blend",
+      "phonetics": ["blɛnd"],
+      "definitions": ["v. 混合 n. 混合物"],
+      "examples": ["Blend the ingredients until smooth."]
+    },
+    {
+      "term": "cautious",
+      "phonetics": ["ˈkɔːʃəs"],
+      "definitions": ["adj. 谨慎的"],
+      "examples": ["Be cautious when crossing the road."]
+    },
+    {
+      "term": "dazzle",
+      "phonetics": ["ˈdaz(ə)l"],
+      "definitions": ["v. 使目眩"],
+      "examples": ["The bright lights dazzled me."]
+    },
+    {
+      "term": "exaggerate",
+      "phonetics": ["ɪɡˈzadʒəreɪt"],
+      "definitions": ["v. 夸大"],
+      "examples": ["Don't exaggerate the facts."]
+    },
+    {
+      "term": "flourish",
+      "phonetics": ["ˈflʌrɪʃ"],
+      "definitions": ["v. 繁荣，挥舞"],
+      "examples": ["The plants flourished in the sunlight."]
+    },
+    {
+      "term": "gratify",
+      "phonetics": ["ˈɡratɪfaɪ"],
+      "definitions": ["v. 使满足"],
+      "examples": ["Your praise gratified me."]
+    },
+    {
+      "term": "hinder",
+      "phonetics": ["ˈhɪndə"],
+      "definitions": ["v. 阻碍"],
+      "examples": ["Bad weather hindered our progress."]
+    },
+    {
+      "term": "indifferent",
+      "phonetics": ["ɪnˈdɪf(ə)r(ə)nt"],
+      "definitions": ["adj. 冷漠的"],
+      "examples": ["He seemed indifferent to our problems."]
+    },
+    {
+      "term": "jerk",
+      "phonetics": ["dʒɜːk"],
+      "definitions": ["n. 急拉 v. 猛拉"],
+      "examples": ["The bus stopped with a jerk."]
+    },
+    {
+      "term": "linger",
+      "phonetics": ["ˈlɪŋɡə"],
+      "definitions": ["v. 徘徊，拖延"],
+      "examples": ["The smell of coffee lingered in the air."]
+    },
+    {
+      "term": "mutter",
+      "phonetics": ["ˈmʌtə"],
+      "definitions": ["v. 咕哝"],
+      "examples": ["He muttered something under his breath."]
+    },
+    {
+      "term": "numb",
+      "phonetics": ["nʌm"],
+      "definitions": ["adj. 麻木的"],
+      "examples": ["My fingers were numb with cold."]
+    },
+    {
+      "term": "overwhelm",
+      "phonetics": ["əʊvəˈwɛlm"],
+      "definitions": ["v. 压倒"],
+      "examples": ["We were overwhelmed by the response."]
+    },
+    {
+      "term": "ponder",
+      "phonetics": ["ˈpɒndə"],
+      "definitions": ["v. 沉思"],
+      "examples": ["He pondered the question for a while."]
+    },
+    {
+      "term": "quiver",
+      "phonetics": ["ˈkwɪvə"],
+      "definitions": ["v. 颤抖 n. 颤抖"],
+      "examples": ["Her lip quivered with emotion."]
+    },
+    {
+      "term": "reproach",
+      "phonetics": ["rɪˈprəʊtʃ"],
+      "definitions": ["n. 责备 v. 责备"],
+      "examples": ["Her eyes were full of reproach."]
+    },
+    {
+      "term": "soar",
+      "phonetics": ["sɔː"],
+      "definitions": ["v. 高飞，猛增"],
+      "examples": ["Eagles were soaring overhead."]
+    },
+    {
+      "term": "triumph",
+      "phonetics": ["ˈtrʌɪʌmf"],
+      "definitions": ["n. 胜利 v. 获胜"],
+      "examples": ["Justice triumphed in the end."]
+    },
+    {
+      "term": "utter",
+      "phonetics": ["ˈʌtə"],
+      "definitions": ["v. 说出 adj. 完全的"],
+      "examples": ["He uttered a cry of pain."]
+    },
+    {
+      "term": "vanish",
+      "phonetics": ["ˈvanɪʃ"],
+      "definitions": ["v. 消失"],
+      "examples": ["The sun vanished behind clouds."]
+    },
+    {
+      "term": "weary",
+      "phonetics": ["ˈwɪəri"],
+      "definitions": ["adj. 疲倦的"],
+      "examples": ["I'm weary after the long journey."]
+    },
+    {
+      "term": "yearn",
+      "phonetics": ["jɜːn"],
+      "definitions": ["v. 渴望"],
+      "examples": ["She yearned for her homeland."]
+    }
+  ]
+}

@@ -36,6 +36,9 @@ async function performSync(): Promise<string> {
   const wordLibraries = librariesRes.data?.map((lib: any) => ({
     id: lib.id,
     name: lib.name,
+    description: lib.description,
+    category: lib.category,
+    wordCount: lib.word_count,
     createdAt: new Date(lib.created_at),
     modifiedAt: new Date(lib.modified_at),
     userId: lib.user_id,

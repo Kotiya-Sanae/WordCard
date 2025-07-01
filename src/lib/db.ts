@@ -8,8 +8,12 @@ export const setSyncingFromRealtime = (value: boolean) => { isSyncingFromRealtim
 // 1. 定义数据接口
 
 export interface WordLibrary {
-  id: string;
+  id:string;
+  userId: string;
   name: string;
+  description?: string;
+  category?: '用户' | '内置';
+  wordCount?: number;
   createdAt: Date;
 }
 
@@ -91,6 +95,9 @@ class WordCardDB extends Dexie {
     this.version(5).stores({
       syncQueue: '++id, status',
     });
+    this.version(6).stores({
+      wordLibraries: '&id, name, category',
+    });
 
     this.on('ready', () => {
       this.words.hook('creating', async (primKey, obj, trans) => {
@@ -130,6 +137,25 @@ class WordCardDB extends Dexie {
         triggerSync();
         return undefined;
       });
+
+      this.wordLibraries.hook('creating', async (primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'insert', tableName: 'wordLibraries', payload: obj, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.wordLibraries.hook('updating', async (modifications, primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'update', tableName: 'wordLibraries', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.wordLibraries.hook('deleting', async (primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'delete', tableName: 'wordLibraries', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
     });
   }
 }
@@ -152,6 +178,7 @@ export async function populate() {
 
     await db.wordLibraries.add({
       id: libraryId,
+      userId: 'dev-user-id', // a placeholder for development
       name: '默认词库',
       createdAt: new Date(),
     });

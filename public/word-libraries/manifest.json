@@ -1,0 +1,23 @@
+[
+  {
+    "id": "cet4",
+    "name": "CET-4 高频词汇",
+    "description": "大学英语四级考试核心词汇。",
+    "wordCount": 116,
+    "path": "/word-libraries/cet4.json"
+  },
+  {
+    "id": "cet6",
+    "name": "CET-6 高频词汇",
+    "description": "大学英语六级考试核心词汇。",
+    "wordCount": 100,
+    "path": "/word-libraries/cet6.json"
+  },
+  {
+    "id": "kaoyan",
+    "name": "考研核心词汇",
+    "description": "全国硕士研究生统一招生考试核心词汇。",
+    "wordCount": 103,
+    "path": "/word-libraries/kaoyan.json"
+  }
+]

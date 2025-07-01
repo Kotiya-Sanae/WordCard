@@ -1,0 +1,610 @@
+{
+  "library": {
+    "name": "CET-6 高频词汇",
+    "description": "大学英语六级考试核心词汇。",
+    "category": "内置",
+    "wordCount": 100
+  },
+  "words": [
+    {
+      "term": "accelerate",
+      "phonetics": ["əkˈseləreɪt"],
+      "definitions": ["v. (使)加速；(使)增速"],
+      "examples": ["The car accelerated to overtake the bus."]
+    },
+    {
+      "term": "abnormal",
+      "phonetics": ["æbˈnɔːm(ə)l"],
+      "definitions": ["adj. 反常的，异常的"],
+      "examples": ["His abnormal behavior worried his friends."]
+    },
+    {
+      "term": "baffle",
+      "phonetics": ["ˈbaf(ə)l"],
+      "definitions": ["v. 使困惑，难住"],
+      "examples": ["The complex problem baffled the scientists."]
+    },
+    {
+      "term": "catastrophe",
+      "phonetics": ["kəˈtastrəfi"],
+      "definitions": ["n. 大灾难"],
+      "examples": ["The earthquake was a major catastrophe."]
+    },
+    {
+      "term": "deteriorate",
+      "phonetics": ["dɪˈtɪərɪəreɪt"],
+      "definitions": ["v. 恶化"],
+      "examples": ["His health deteriorated rapidly."]
+    },
+    {
+      "term": "eloquent",
+      "phonetics": ["ˈɛləkwənt"],
+      "definitions": ["adj. 雄辩的"],
+      "examples": ["She gave an eloquent speech."]
+    },
+    {
+      "term": "flaw",
+      "phonetics": ["flɔː"],
+      "definitions": ["n. 瑕疵，缺陷"],
+      "examples": ["There's a flaw in your argument."]
+    },
+    {
+      "term": "grim",
+      "phonetics": ["ɡrɪm"],
+      "definitions": ["adj. 严峻的，冷酷的"],
+      "examples": ["The situation looks grim."]
+    },
+    {
+      "term": "hypocrisy",
+      "phonetics": ["hɪˈpɒkrəsi"],
+      "definitions": ["n. 虚伪"],
+      "examples": ["His hypocrisy was finally exposed."]
+    },
+    {
+      "term": "intricate",
+      "phonetics": ["ˈɪntrɪkət"],
+      "definitions": ["adj. 错综复杂的"],
+      "examples": ["The watch has an intricate mechanism."]
+    },
+    {
+      "term": "jeopardize",
+      "phonetics": ["ˈdʒɛpədaɪz"],
+      "definitions": ["v. 危害"],
+      "examples": ["Smoking jeopardizes your health."]
+    },
+    {
+      "term": "knack",
+      "phonetics": ["nak"],
+      "definitions": ["n. 诀窍，本领"],
+      "examples": ["She has a knack for languages."]
+    },
+    {
+      "term": "lament",
+      "phonetics": ["ləˈmɛnt"],
+      "definitions": ["v. 哀悼 n. 挽歌"],
+      "examples": ["The poem laments the loss of youth."]
+    },
+    {
+      "term": "meticulous",
+      "phonetics": ["mɪˈtɪkjʊləs"],
+      "definitions": ["adj. 一丝不苟的"],
+      "examples": ["She's meticulous in her work."]
+    },
+    {
+      "term": "notorious",
+      "phonetics": ["nə(ʊ)ˈtɔːrɪəs"],
+      "definitions": ["adj. 臭名昭著的"],
+      "examples": ["This area is notorious for crime."]
+    },
+    {
+      "term": "obscure",
+      "phonetics": ["əbˈskjʊə"],
+      "definitions": ["adj. 模糊的 v. 掩盖"],
+      "examples": ["The meaning of the text is obscure."]
+    },
+    {
+      "term": "paradox",
+      "phonetics": ["ˈparədɒks"],
+      "definitions": ["n. 悖论"],
+      "examples": ["This creates an interesting paradox."]
+    },
+    {
+      "term": "quench",
+      "phonetics": ["kwɛn(t)ʃ"],
+      "definitions": ["v. 解渴，熄灭"],
+      "examples": ["The water quenched his thirst."]
+    },
+    {
+      "term": "redundant",
+      "phonetics": ["rɪˈdʌnd(ə)nt"],
+      "definitions": ["adj. 多余的"],
+      "examples": ["Many workers were made redundant."]
+    },
+    {
+      "term": "skeptical",
+      "phonetics": ["ˈskɛptɪk(ə)l"],
+      "definitions": ["adj. 怀疑的"],
+      "examples": ["I'm skeptical about his claims."]
+    },
+    {
+      "term": "trivial",
+      "phonetics": ["ˈtrɪvɪəl"],
+      "definitions": ["adj. 琐碎的"],
+      "examples": ["Don't waste time on trivial matters."]
+    },
+    {
+      "term": "unanimous",
+      "phonetics": ["juːˈnanɪməs"],
+      "definitions": ["adj. 全体一致的"],
+      "examples": ["The decision was unanimous."]
+    },
+    {
+      "term": "vulnerable",
+      "phonetics": ["ˈvʌln(ə)rəb(ə)l"],
+      "definitions": ["adj. 易受伤害的"],
+      "examples": ["Children are particularly vulnerable."]
+    },
+    {
+      "term": "withhold",
+      "phonetics": ["wɪðˈhəʊld"],
+      "definitions": ["v. 扣留，拒绝给予"],
+      "examples": ["They withheld payment."]
+    },
+    {
+      "term": "zeal",
+      "phonetics": ["ziːl"],
+      "definitions": ["n. 热情"],
+      "examples": ["He worked with great zeal."]
+    },
+    {
+      "term": "abstain",
+      "phonetics": ["əbˈsteɪn"],
+      "definitions": ["v. 戒绝，弃权"],
+      "examples": ["He abstained from alcohol."]
+    },
+    {
+      "term": "bizarre",
+      "phonetics": ["bɪˈzɑː"],
+      "definitions": ["adj. 奇异的"],
+      "examples": ["She wore a bizarre costume."]
+    },
+    {
+      "term": "complacent",
+      "phonetics": ["kəmˈpleɪs(ə)nt"],
+      "definitions": ["adj. 自满的"],
+      "examples": ["We can't afford to be complacent."]
+    },
+    {
+      "term": "deceptive",
+      "phonetics": ["dɪˈsɛptɪv"],
+      "definitions": ["adj. 欺骗性的"],
+      "examples": ["Appearances can be deceptive."]
+    },
+    {
+      "term": "eloquence",
+      "phonetics": ["ˈɛləkwəns"],
+      "definitions": ["n. 雄辩"],
+      "examples": ["His eloquence impressed the audience."]
+    },
+    {
+      "term": "fabricate",
+      "phonetics": ["ˈfabrɪkeɪt"],
+      "definitions": ["v. 捏造，制造"],
+      "examples": ["The evidence was fabricated."]
+    },
+    {
+      "term": "gregarious",
+      "phonetics": ["ɡrɪˈɡɛːrɪəs"],
+      "definitions": ["adj. 群居的，爱社交的"],
+      "examples": ["She's very gregarious."]
+    },
+    {
+      "term": "haphazard",
+      "phonetics": ["hapˈhazəd"],
+      "definitions": ["adj. 随意的"],
+      "examples": ["The books were arranged haphazardly."]
+    },
+    {
+      "term": "impede",
+      "phonetics": ["ɪmˈpiːd"],
+      "definitions": ["v. 阻碍"],
+      "examples": ["Snow impeded our progress."]
+    },
+    {
+      "term": "jubilant",
+      "phonetics": ["ˈdʒuːbɪl(ə)nt"],
+      "definitions": ["adj. 欢欣的"],
+      "examples": ["The team was jubilant after winning."]
+    },
+    {
+      "term": "kindle",
+      "phonetics": ["ˈkɪnd(ə)l"],
+      "definitions": ["v. 点燃，激起"],
+      "examples": ["The speech kindled their enthusiasm."]
+    },
+    {
+      "term": "languid",
+      "phonetics": ["ˈlaŋɡwɪd"],
+      "definitions": ["adj. 倦怠的"],
+      "examples": ["She moved in a languid manner."]
+    },
+    {
+      "term": "malaise",
+      "phonetics": ["maˈleɪz"],
+      "definitions": ["n. 不适，萎靡"],
+      "examples": ["A general malaise affected the team."]
+    },
+    {
+      "term": "nostalgia",
+      "phonetics": ["nɒˈstaldʒə"],
+      "definitions": ["n. 怀旧之情"],
+      "examples": ["The photo evoked nostalgia."]
+    },
+    {
+      "term": "obliterate",
+      "phonetics": ["əˈblɪtəreɪt"],
+      "definitions": ["v. 抹去"],
+      "examples": ["The bombing obliterated the village."]
+    },
+    {
+      "term": "permeate",
+      "phonetics": ["ˈpɜːmɪeɪt"],
+      "definitions": ["v. 渗透，弥漫"],
+      "examples": ["The smell permeated the room."]
+    },
+    {
+      "term": "quintessential",
+      "phonetics": ["ˌkwɪntɪˈsɛnʃ(ə)l"],
+      "definitions": ["adj. 典型的"],
+      "examples": ["This is the quintessential French café."]
+    },
+    {
+      "term": "reprehensible",
+      "phonetics": ["ˌrɛprɪˈhɛnsɪb(ə)l"],
+      "definitions": ["adj. 应受谴责的"],
+      "examples": ["His behavior was reprehensible."]
+    },
+    {
+      "term": "scrutinize",
+      "phonetics": ["ˈskruːtɪnaɪz"],
+      "definitions": ["v. 仔细检查"],
+      "examples": ["The documents were carefully scrutinized."]
+    },
+    {
+      "term": "tantamount",
+      "phonetics": ["ˈtantəmaʊnt"],
+      "definitions": ["adj. 等同于"],
+      "examples": ["His silence was tantamount to admission."]
+    },
+    {
+      "term": "ubiquitous",
+      "phonetics": ["juːˈbɪkwɪtəs"],
+      "definitions": ["adj. 普遍存在的"],
+      "examples": ["Mobile phones are ubiquitous now."]
+    },
+    {
+      "term": "vindicate",
+      "phonetics": ["ˈvɪndɪkeɪt"],
+      "definitions": ["v. 证明...正确"],
+      "examples": ["The evidence vindicated his claim."]
+    },
+    {
+      "term": "wane",
+      "phonetics": ["weɪn"],
+      "definitions": ["v. 减弱"],
+      "examples": ["His influence began to wane."]
+    },
+    {
+      "term": "alleviate",
+      "phonetics": ["əˈliːvɪeɪt"],
+      "definitions": ["v. 减轻"],
+      "examples": ["The drug alleviates pain."]
+    },
+    {
+      "term": "bolster",
+      "phonetics": ["ˈbəʊlstə"],
+      "definitions": ["v. 支持，加强"],
+      "examples": ["The evidence bolstered his argument."]
+    },
+    {
+      "term": "cognizant",
+      "phonetics": ["ˈkɒɡnɪz(ə)nt"],
+      "definitions": ["adj. 认知的"],
+      "examples": ["We're fully cognizant of the risks."]
+    },
+    {
+      "term": "deplore",
+      "phonetics": ["dɪˈplɔː"],
+      "definitions": ["v. 谴责"],
+      "examples": ["We deplore all forms of violence."]
+    },
+    {
+      "term": "eclectic",
+      "phonetics": ["ɪˈklɛktɪk, ɛˈklɛktɪk"],
+      "definitions": ["adj. 折衷的"],
+      "examples": ["She has eclectic tastes in music."]
+    },
+    {
+      "term": "fastidious",
+      "phonetics": ["faˈstɪdɪəs"],
+      "definitions": ["adj. 挑剔的"],
+      "examples": ["He's fastidious about cleanliness."]
+    },
+    {
+      "term": "garrulous",
+      "phonetics": ["ˈɡar(j)ʊləs"],
+      "definitions": ["adj. 喋喋不休的"],
+      "examples": ["The garrulous old man talked for hours."]
+    },
+    {
+      "term": "haughty",
+      "phonetics": ["ˈhɔːti"],
+      "definitions": ["adj. 傲慢的"],
+      "examples": ["She gave me a haughty look."]
+    },
+    {
+      "term": "iconoclast",
+      "phonetics": ["aɪˈkɒnəklast"],
+      "definitions": ["n. 打破传统者"],
+      "examples": ["He was an iconoclast in art."]
+    },
+    {
+      "term": "juxtapose",
+      "phonetics": ["ˌdʒʌkstəˈpəʊz"],
+      "definitions": ["v. 并列"],
+      "examples": ["The exhibition juxtaposes old and new works."]
+    },
+    {
+      "term": "kowtow",
+      "phonetics": ["ˌkaʊˈtaʊ"],
+      "definitions": ["v. 叩头，卑躬屈膝"],
+      "examples": ["He refused to kowtow to authority."]
+    },
+    {
+      "term": "lucrative",
+      "phonetics": ["ˈluːkrətɪv, ljuː-"],
+      "definitions": ["adj. 有利可图的"],
+      "examples": ["It's a lucrative business."]
+    },
+    {
+      "term": "mellifluous",
+      "phonetics": ["mɪˈlɪflʊəs"],
+      "definitions": ["adj. 甜美的（声音）"],
+      "examples": ["She has a mellifluous voice."]
+    },
+    {
+      "term": "nefarious",
+      "phonetics": ["nɪˈfɛːrɪəs"],
+      "definitions": ["adj. 邪恶的"],
+      "examples": ["They had nefarious intentions."]
+    },
+    {
+      "term": "obfuscate",
+      "phonetics": ["ˈɒbfʌskeɪt"],
+      "definitions": ["v. 使困惑"],
+      "examples": ["The explanation only obfuscated the issue."]
+    },
+    {
+      "term": "paragon",
+      "phonetics": ["ˈparəɡ(ə)n"],
+      "definitions": ["n. 模范"],
+      "examples": ["She's a paragon of virtue."]
+    },
+    {
+      "term": "quagmire",
+      "phonetics": ["ˈkwaɡmaɪə"],
+      "definitions": ["n. 沼泽，困境"],
+      "examples": ["The war became a political quagmire."]
+    },
+    {
+      "term": "recalcitrant",
+      "phonetics": ["rɪˈkalsɪtr(ə)nt"],
+      "definitions": ["adj. 顽抗的"],
+      "examples": ["The recalcitrant child refused to obey."]
+    },
+    {
+      "term": "sanguine",
+      "phonetics": ["ˈsaŋɡwɪn"],
+      "definitions": ["adj. 乐观的"],
+      "examples": ["He's sanguine about the future."]
+    },
+    {
+      "term": "trepidation",
+      "phonetics": ["ˌtrɛpɪˈdeɪʃ(ə)n"],
+      "definitions": ["n. 恐惧"],
+      "examples": ["She faced the exam with trepidation."]
+    },
+    {
+      "term": "unfathomable",
+      "phonetics": ["ʌnˈfað(ə)məb(ə)l"],
+      "definitions": ["adj. 深不可测的"],
+      "examples": ["The universe is unfathomable."]
+    },
+    {
+      "term": "vociferous",
+      "phonetics": ["və(ʊ)ˈsɪf(ə)rəs"],
+      "definitions": ["adj. 喧嚷的"],
+      "examples": ["The protesters were vociferous."]
+    },
+    {
+      "term": "whet",
+      "phonetics": ["wɛt"],
+      "definitions": ["v. 刺激（食欲）"],
+      "examples": ["The smell whetted my appetite."]
+    },
+    {
+      "term": "xenophobia",
+      "phonetics": ["ˌzɛnəˈfəʊbɪə"],
+      "definitions": ["n. 仇外"],
+      "examples": ["The policy was criticized as xenophobia."]
+    },
+    {
+      "term": "yoke",
+      "phonetics": ["jəʊk"],
+      "definitions": ["n. 束缚 v. 结合"],
+      "examples": ["They threw off the yoke of oppression."]
+    },
+    {
+      "term": "zealot",
+      "phonetics": ["ˈzɛlət"],
+      "definitions": ["n. 狂热者"],
+      "examples": ["Religious zealots often cause conflicts."]
+    },
+    {
+      "term": "acrimonious",
+      "phonetics": ["ˌakrɪˈməʊnɪəs"],
+      "definitions": ["adj. 尖刻的"],
+      "examples": ["The debate became acrimonious."]
+    },
+    {
+      "term": "blandishment",
+      "phonetics": ["ˈblandɪʃm(ə)nt"],
+      "definitions": ["n. 奉承"],
+      "examples": ["He resisted their blandishments."]
+    },
+    {
+      "term": "cajole",
+      "phonetics": ["kəˈdʒəʊl"],
+      "definitions": ["v. 哄骗"],
+      "examples": ["She cajoled him into helping."]
+    },
+    {
+      "term": "dearth",
+      "phonetics": ["dəːθ"],
+      "definitions": ["n. 缺乏"],
+      "examples": ["There's a dearth of evidence."]
+    },
+    {
+      "term": "ebullient",
+      "phonetics": ["ɪˈbʌlɪənt"],
+      "definitions": ["adj. 热情洋溢的"],
+      "examples": ["She was in an ebullient mood."]
+    },
+    {
+      "term": "facetious",
+      "phonetics": ["fəˈsiːʃəs"],
+      "definitions": ["adj. 开玩笑的"],
+      "examples": ["Don't be facetious about serious matters."]
+    },
+    {
+      "term": "gambol",
+      "phonetics": ["ˈɡamb(ə)l"],
+      "definitions": ["v. 雀跃"],
+      "examples": ["Lambs gamboled in the field."]
+    },
+    {
+      "term": "harangue",
+      "phonetics": ["həˈraŋ"],
+      "definitions": ["n. 长篇演说 v. 高谈阔论"],
+      "examples": ["He delivered a political harangue."]
+    },
+    {
+      "term": "idiosyncratic",
+      "phonetics": ["ˌɪdɪə(ʊ)sɪŋˈkratɪk"],
+      "definitions": ["adj. 特质的"],
+      "examples": ["His style is highly idiosyncratic."]
+    },
+    {
+      "term": "jocular",
+      "phonetics": ["ˈdʒɒkjʊlə"],
+      "definitions": ["adj. 爱开玩笑的"],
+      "examples": ["He maintained a jocular tone."]
+    },
+    {
+      "term": "kudos",
+      "phonetics": ["ˈkjuːdɒs"],
+      "definitions": ["n. 荣誉"],
+      "examples": ["She received kudos for her performance."]
+    },
+    {
+      "term": "labyrinthine",
+      "phonetics": ["ˌlabəˈrɪnθʌɪn"],
+      "definitions": ["adj. 迷宫般的"],
+      "examples": ["The building has labyrinthine corridors."]
+    },
+    {
+      "term": "maverick",
+      "phonetics": ["ˈmav(ə)rɪk"],
+      "definitions": ["n. 特立独行者"],
+      "examples": ["He's always been a maverick in his field."]
+    },
+    {
+      "term": "nadir",
+      "phonetics": ["ˈneɪdɪə"],
+      "definitions": ["n. 最低点"],
+      "examples": ["His career reached its nadir that year."]
+    },
+    {
+      "term": "obstreperous",
+      "phonetics": ["əbˈstrɛp(ə)rəs"],
+      "definitions": ["adj. 喧闹的"],
+      "examples": ["The obstreperous child disrupted the class."]
+    },
+    {
+      "term": "palisade",
+      "phonetics": ["ˌpalɪˈseɪd"],
+      "definitions": ["n. 栅栏"],
+      "examples": ["A wooden palisade surrounded the fort."]
+    },
+    {
+      "term": "quixotic",
+      "phonetics": ["kwɪkˈsɒtɪk"],
+      "definitions": ["adj. 不切实际的"],
+      "examples": ["His quixotic plan was doomed to fail."]
+    },
+    {
+      "term": "recapitulate",
+      "phonetics": ["ˌriːkəˈpɪtjʊleɪt"],
+      "definitions": ["v. 概括"],
+      "examples": ["Let me recapitulate the main points."]
+    },
+    {
+      "term": "sartorial",
+      "phonetics": ["sɑːˈtɔːrɪəl"],
+      "definitions": ["adj. 裁缝的，服装的"],
+      "examples": ["He's known for his sartorial elegance."]
+    },
+    {
+      "term": "tirade",
+      "phonetics": ["tʌɪˈreɪd"],
+      "definitions": ["n. 长篇抨击"],
+      "examples": ["He launched into a tirade against the government."]
+    },
+    {
+      "term": "ubiquity",
+      "phonetics": ["juːˈbɪkwɪti"],
+      "definitions": ["n. 普遍存在"],
+      "examples": ["The ubiquity of smartphones is remarkable."]
+    },
+    {
+      "term": "vacillate",
+      "phonetics": ["ˈvasɪleɪt"],
+      "definitions": ["v. 犹豫不决"],
+      "examples": ["He vacillated between two choices."]
+    },
+    {
+      "term": "winsome",
+      "phonetics": ["ˈwɪns(ə)m"],
+      "definitions": ["adj. 迷人的"],
+      "examples": ["She gave him a winsome smile."]
+    },
+    {
+      "term": "xenial",
+      "phonetics": ["ˈziːnɪəl"],
+      "definitions": ["adj. 好客的"],
+      "examples": ["The xenial host made us feel welcome."]
+    },
+    {
+      "term": "yonder",
+      "phonetics": ["ˈjɒndə"],
+      "definitions": ["adv. 那边"],
+      "examples": ["Look at the castle yonder."]
+    },
+    {
+      "term": "zephyr",
+      "phonetics": ["ˈzɛfə"],
+      "definitions": ["n. 和风"],
+      "examples": ["A gentle zephyr rustled the leaves."]
+    }
+  ]
+}
