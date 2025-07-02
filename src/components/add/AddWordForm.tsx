@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db, Word } from "@/lib/db";
+import { db, Word, Tag } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,18 @@ import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
 import { WordTagsEditor } from "@/components/library/WordTagsEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLiveQuery } from "dexie-react-hooks";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Tags } from "lucide-react";
 
 interface AddWordFormProps {
   initialData?: Word;
@@ -21,8 +33,11 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
   const [phonetics, setPhonetics] = useState("");
   const [definitions, setDefinitions] = useState("");
   const [examples, setExamples] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
   const router = useRouter();
+  const allTags = useLiveQuery(() => db.tags.toArray(), []);
 
   const isEditMode = !!initialData;
 
@@ -81,17 +96,20 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
           return;
         }
 
-        await db.transaction('rw', db.words, db.studyRecords, db.syncQueue, async () => {
+        await db.transaction('rw', db.words, db.studyRecords, db.wordTags, db.syncQueue, async () => {
+          // 1. 添加单词
           await db.words.add({
             ...wordData,
             id: newWordId,
-            libraryId: userLibrary.id, // 使用从本地获取的正确 libraryId
+            libraryId: userLibrary.id,
             createdAt: new Date(),
           });
+
+          // 2. 添加学习记录
           await db.studyRecords.add({
             id: crypto.randomUUID(),
             wordId: newWordId,
-            userId: user.id, // 注入 userId
+            userId: user.id,
             dueDate: new Date(),
             stability: 0,
             difficulty: 0,
@@ -99,6 +117,17 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
             status: 'new',
             modifiedAt: new Date(),
           });
+
+          // 3. 添加标签关联
+          if (selectedTagIds.length > 0) {
+            const wordTagRecords = selectedTagIds.map(tagId => ({
+              id: crypto.randomUUID(),
+              wordId: newWordId,
+              tagId: tagId,
+              userId: user.id,
+            }));
+            await db.wordTags.bulkAdd(wordTagRecords);
+          }
         });
         toast.success("单词添加成功！");
         router.push('/library');
@@ -152,16 +181,65 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
         />
       </div>
 
-      {isEditMode && initialData && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">标签</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">标签</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isEditMode && initialData ? (
             <WordTagsEditor wordId={initialData.id} />
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div>
+              <div className="flex flex-wrap gap-2 mb-4 min-h-[24px]">
+                {allTags
+                  ?.filter(tag => selectedTagIds.includes(tag.id))
+                  .map(tag => (
+                    <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
+                  ))
+                }
+              </div>
+              <Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button type="button" variant="outline" size="sm">
+                    <Tags className="mr-2 h-4 w-4" />
+                    {selectedTagIds.length > 0 ? "编辑标签" : "添加标签"}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>选择标签</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
+                    {allTags && allTags.length > 0 ? (
+                      allTags.map((tag) => (
+                        <div key={tag.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`add-tag-${tag.id}`}
+                            checked={selectedTagIds.includes(tag.id)}
+                            onCheckedChange={(checked) => {
+                              setSelectedTagIds(prev =>
+                                checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
+                              );
+                            }}
+                          />
+                          <Label htmlFor={`add-tag-${tag.id}`}>{tag.name}</Label>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        暂无标签。请先在“设置”-“标签管理”中创建。
+                      </p>
+                    )}
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={() => setIsTagDialogOpen(false)}>完成</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? "保存中..." : (isEditMode ? "更新单词" : "保存单词")}

@@ -62,9 +62,9 @@ function WordListItem({ item, isMultiSelectMode, isSelected, onSelect }: WordLis
   };
 
   const statusColorMap: Record<WordStatus, string> = {
-    new: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-    learning: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-    mastered: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+    new: "bg-blue-100 text-blue-800 hover:bg-blue-100/80 dark:bg-blue-900 dark:text-blue-300",
+    learning: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80 dark:bg-yellow-900 dark:text-yellow-300",
+    mastered: "bg-green-100 text-green-800 hover:bg-green-100/80 dark:bg-green-900 dark:text-green-300",
   };
 
   const handleDelete = async () => {
@@ -97,9 +97,9 @@ function WordListItem({ item, isMultiSelectMode, isSelected, onSelect }: WordLis
             <div>
               <CardTitle className="text-lg font-semibold">{item.term}</CardTitle>
               {item.record && (
-                <div className={`mt-1 inline-block px-2 py-0.5 rounded-full text-xs font-medium ${statusColorMap[item.record.status]}`}>
-                  {statusMap[item.record.status]}
-                </div>
+               <Badge variant="outline" className={cn("mt-1", statusColorMap[item.record.status])}>
+                 {statusMap[item.record.status]}
+               </Badge>
               )}
             </div>
             {!isMultiSelectMode && (
@@ -255,15 +255,31 @@ export function WordList() {
 
   const isAllSelected = words ? selectedIds.length === words.length && words.length > 0 : false;
 
+  const counts = useMemo(() => {
+    if (!wordsData) return { all: 0, new: 0, learning: 0, mastered: 0 };
+    const result = {
+      all: wordsData.length,
+      new: 0,
+      learning: 0,
+      mastered: 0,
+    };
+    wordsData.forEach(word => {
+      if (word.record?.status) {
+        result[word.record.status]++;
+      }
+    });
+    return result;
+  }, [wordsData]);
+
   return (
     <div className="relative pb-24">
       <div className="flex justify-between items-center mb-4">
         <Tabs defaultValue="all" onValueChange={(value) => setFilter(value as WordStatus | "all")}>
           <TabsList>
-            <TabsTrigger value="all">所有</TabsTrigger>
-            <TabsTrigger value="new">新单词</TabsTrigger>
-            <TabsTrigger value="learning">学习中</TabsTrigger>
-            <TabsTrigger value="mastered">已掌握</TabsTrigger>
+            <TabsTrigger value="all">所有 ({counts.all})</TabsTrigger>
+            <TabsTrigger value="new">新单词 ({counts.new})</TabsTrigger>
+            <TabsTrigger value="learning">学习中 ({counts.learning})</TabsTrigger>
+            <TabsTrigger value="mastered">已掌握 ({counts.mastered})</TabsTrigger>
           </TabsList>
         </Tabs>
         <Button variant="ghost" onClick={handleToggleMultiSelect}>

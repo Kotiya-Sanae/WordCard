@@ -45,10 +45,25 @@ export default function AddLibraryPage() {
       const response = await fetch(item.path);
       const data = await response.json();
 
-      await db.transaction('rw', db.wordLibraries, db.words, db.studyRecords, db.syncQueue, async () => {
+      await db.transaction('rw', [db.wordLibraries, db.words, db.studyRecords, db.tags, db.wordTags, db.syncQueue], async () => {
         const newLibraryId = uuidv4();
+        const tagName = item.name; // e.g., "CET-4 高频词汇"
         
-        // 1. 创建新词库
+        // 1. 查找或创建标签
+        let tag = await db.tags.where('name').equals(tagName).first();
+        if (!tag) {
+          const newTagId = uuidv4();
+          tag = {
+            id: newTagId,
+            userId: user.id,
+            name: tagName,
+            createdAt: new Date(),
+          };
+          await db.tags.add(tag);
+        }
+        const tagId = tag.id;
+
+        // 2. 创建新词库
         await db.wordLibraries.add({
           id: newLibraryId,
           userId: user.id,
@@ -79,11 +94,20 @@ export default function AddLibraryPage() {
           status: 'new' as const,
           modifiedAt: new Date(),
         }));
+        
+        const wordTagsToAdd = wordsToAdd.map(word => ({
+          id: uuidv4(),
+          wordId: word.id,
+          tagId: tagId,
+          userId: user.id,
+        }));
 
-        // 2. 批量添加单词
+        // 3. 批量添加单词
         await db.words.bulkAdd(wordsToAdd);
-        // 3. 批量添加对应的学习记录
+        // 4. 批量添加对应的学习记录
         await db.studyRecords.bulkAdd(recordsToAdd);
+        // 5. 批量添加单词与标签的关联
+        await db.wordTags.bulkAdd(wordTagsToAdd);
       });
 
       toast.success(`词库 "${item.name}" 添加成功!`);

@@ -115,7 +115,7 @@ class WordCardDB extends Dexie {
       wordLibraries: '&id, name, category',
     });
     this.version(7).stores({
-      tags: '&id, name',
+      tags: '&id, &name',
       wordTags: '++id, &[wordId+tagId], wordId, tagId',
     });
 

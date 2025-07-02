@@ -31,10 +31,12 @@ export default function TagsPage() {
   const tags = useLiveQuery(() => db.tags.toArray(), []);
 
   const handleCreateTag = async () => {
-    if (!newTagName.trim()) {
+    const trimmedName = newTagName.trim();
+    if (!trimmedName) {
       toast.error("标签名不能为空");
       return;
     }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast.error("请先登录");
@@ -42,19 +44,24 @@ export default function TagsPage() {
     }
 
     try {
-      await db.transaction('rw', db.tags, db.syncQueue, async () => {
+      await db.transaction('rw', [db.tags, db.syncQueue], async () => {
+        const existing = await db.tags.where('name').equalsIgnoreCase(trimmedName).first();
+        if (existing) {
+          throw new Error("该标签名已存在");
+        }
+        
         await db.tags.add({
           id: uuidv4(),
           userId: user.id,
-          name: newTagName.trim(),
+          name: trimmedName,
           createdAt: new Date(),
         });
       });
       setNewTagName("");
       toast.success("标签创建成功");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("创建失败，该标签可能已存在");
+      toast.error(error.message || "创建失败，请稍后重试");
     }
   };
 
@@ -91,16 +98,24 @@ export default function TagsPage() {
   };
 
   const handleUpdateTag = async () => {
-    if (!editingTagName.trim() || !editingTag) return;
+    const trimmedName = editingTagName.trim();
+    if (!trimmedName || !editingTag) return;
+
     try {
-      await db.transaction('rw', db.tags, db.syncQueue, async () => {
-        await db.tags.update(editingTag.id, { name: editingTagName.trim() });
+      await db.transaction('rw', [db.tags, db.syncQueue], async () => {
+        if (trimmedName.toLowerCase() !== editingTag.name.toLowerCase()) {
+          const existing = await db.tags.where('name').equalsIgnoreCase(trimmedName).first();
+          if (existing) {
+            throw new Error("该标签名已存在");
+          }
+        }
+        await db.tags.update(editingTag.id, { name: trimmedName });
       });
       toast.success("标签更新成功");
       handleCancelEdit();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("更新失败");
+      toast.error(error.message || "更新失败，请稍后重试");
     }
   };
 
