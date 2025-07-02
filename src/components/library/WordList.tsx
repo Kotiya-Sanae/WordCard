@@ -9,8 +9,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +30,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Pencil } from "lucide-react";
+import { MoreHorizontal, Trash2, Pencil, Tags } from "lucide-react";
+import { WordTagsEditor } from "./WordTagsEditor";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -42,6 +51,7 @@ interface WordListItemProps {
 function WordListItem({ item, isMultiSelectMode, isSelected, onSelect }: WordListItemProps) {
   const router = useRouter();
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [isTagEditorOpen, setIsTagEditorOpen] = useState(false);
 
   const statusMap: Record<WordStatus, string> = {
     new: "新单词",
@@ -102,6 +112,11 @@ function WordListItem({ item, isMultiSelectMode, isSelected, onSelect }: WordLis
                     <Pencil className="mr-2 h-4 w-4" />
                     编辑
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setIsTagEditorOpen(true)}>
+                    <Tags className="mr-2 h-4 w-4" />
+                    编辑标签
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setIsAlertOpen(true)}
                     className="text-destructive focus:text-destructive"
@@ -137,6 +152,15 @@ function WordListItem({ item, isMultiSelectMode, isSelected, onSelect }: WordLis
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={isTagEditorOpen} onOpenChange={setIsTagEditorOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>为 “{item.term}” 编辑标签</DialogTitle>
+          </DialogHeader>
+          <WordTagsEditor wordId={item.id} />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

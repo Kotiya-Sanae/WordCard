@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Palette, Target, Info, Code, Database } from "lucide-react";
+import { ChevronRight, Palette, Target, Info, Code, Database, Tags } from "lucide-react";
 import InstallPrompt from "@/components/util/InstallPrompt";
 
 const settingsItems = [
@@ -14,6 +14,12 @@ const settingsItems = [
     icon: Target,
     title: "学习设置",
     description: "设定每日目标和复习计划",
+  },
+  {
+    href: "/settings/tags",
+    icon: Tags,
+    title: "标签管理",
+    description: "创建和管理您的自定义标签",
   },
   {
     href: "/settings/data",

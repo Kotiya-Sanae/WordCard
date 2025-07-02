@@ -52,11 +52,25 @@ export interface Setting {
 export interface SyncQueueItem {
   id?: number;
   operation: 'insert' | 'update' | 'delete';
-  tableName: 'words' | 'studyRecords' | 'settings' | 'wordLibraries';
+  tableName: 'words' | 'studyRecords' | 'settings' | 'wordLibraries' | 'tags' | 'wordTags';
   payload: any;
   status: 'pending' | 'syncing' | 'failed';
   attempts: number;
   createdAt: Date;
+}
+
+export interface Tag {
+  id: string; // uuid
+  userId: string;
+  name: string;
+  createdAt: Date;
+}
+
+export interface WordTag {
+  id: string; // uuid
+  wordId: string;
+  tagId: string;
+  userId: string;
 }
 
 // 2. 创建数据库类
@@ -66,6 +80,8 @@ class WordCardDB extends Dexie {
   studyRecords!: Table<StudyRecord>;
   settings!: Table<Setting>;
   syncQueue!: Table<SyncQueueItem>;
+  tags!: Table<Tag>;
+  wordTags!: Table<WordTag>;
 
   constructor() {
     super('WordCardDB');
@@ -97,6 +113,10 @@ class WordCardDB extends Dexie {
     });
     this.version(6).stores({
       wordLibraries: '&id, name, category',
+    });
+    this.version(7).stores({
+      tags: '&id, name',
+      wordTags: '++id, &[wordId+tagId], wordId, tagId',
     });
 
     this.on('ready', () => {
@@ -153,6 +173,38 @@ class WordCardDB extends Dexie {
       this.wordLibraries.hook('deleting', async (primKey, obj, trans) => {
         if (isSyncingFromRealtime) return;
         await db.syncQueue.add({ operation: 'delete', tableName: 'wordLibraries', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+
+      this.tags.hook('creating', async (primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'insert', tableName: 'tags', payload: obj, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.tags.hook('updating', async (modifications, primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'update', tableName: 'tags', payload: { id: primKey, changes: modifications }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.tags.hook('deleting', async (primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'delete', tableName: 'tags', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+
+      this.wordTags.hook('creating', async (primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'insert', tableName: 'wordTags', payload: obj, status: 'pending', attempts: 0, createdAt: new Date() });
+        triggerSync();
+        return undefined;
+      });
+      this.wordTags.hook('deleting', async (primKey, obj, trans) => {
+        if (isSyncingFromRealtime) return;
+        await db.syncQueue.add({ operation: 'delete', tableName: 'wordTags', payload: { id: primKey }, status: 'pending', attempts: 0, createdAt: new Date() });
         triggerSync();
         return undefined;
       });

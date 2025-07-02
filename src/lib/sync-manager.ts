@@ -1,11 +1,20 @@
 import { processSyncQueue } from './sync';
 
+let syncTimeout: NodeJS.Timeout | null = null;
+
 /**
- * 这是一个简单的事件触发器，用于解耦 db.ts 和 sync.ts
- * 
- * 我们使用一个微任务 (Promise.resolve().then()) 来调用 processSyncQueue，
- * 这样可以确保它在当前的 Dexie 事务完成之后再执行，避免了潜在的冲突。
+ * 这是一个带有防抖功能的事件触发器，用于解耦 db.ts 和 sync.ts
+ *
+ * 在短时间内（例如 500 毫秒）无论 triggerSync 被调用多少次，
+ * processSyncQueue 只会在最后一次调用后的 500 毫秒被执行一次。
+ * 这可以防止因快速连续操作而导致的同步竞态条件。
  */
 export function triggerSync() {
-  Promise.resolve().then(processSyncQueue);
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+  }
+  syncTimeout = setTimeout(() => {
+    processSyncQueue();
+    syncTimeout = null;
+  }, 500); // 500ms 防抖延迟
 }

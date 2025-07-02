@@ -20,18 +20,24 @@ async function performSync(): Promise<string> {
     librariesRes,
     wordsRes,
     recordsRes,
-    settingsRes
+    settingsRes,
+    tagsRes,
+    wordTagsRes
   ] = await Promise.all([
     supabase.from('word_libraries').select('*'),
     supabase.from('words').select('*'),
     supabase.from('study_records').select('*'),
-    supabase.from('settings').select('*')
+    supabase.from('settings').select('*'),
+    supabase.from('tags').select('*'),
+    supabase.from('word_tags').select('*')
   ]);
 
   if (librariesRes.error) throw librariesRes.error;
   if (wordsRes.error) throw wordsRes.error;
   if (recordsRes.error) throw recordsRes.error;
   if (settingsRes.error) throw settingsRes.error;
+  if (tagsRes.error) throw tagsRes.error;
+  if (wordTagsRes.error) throw wordTagsRes.error;
 
   const wordLibraries = librariesRes.data?.map((lib: any) => ({
     id: lib.id,
@@ -75,18 +81,34 @@ async function performSync(): Promise<string> {
     userId: s.user_id,
   }));
 
-  console.log(`数据转换完成：获取到 ${wordLibraries?.length} 个词库, ${words?.length} 个单词, ${studyRecords?.length} 条记录, ${settings?.length} 个设置。`);
+  const tags = tagsRes.data?.map((t: any) => ({
+    id: t.id,
+    name: t.name,
+    createdAt: new Date(t.created_at),
+    userId: t.user_id,
+  }));
+
+  const wordTags = wordTagsRes.data?.map((wt: any) => ({
+    id: wt.id,
+    wordId: wt.word_id,
+    tagId: wt.tag_id,
+    userId: wt.user_id,
+  }));
+
+  console.log(`数据转换完成：获取到 ${wordLibraries?.length} 个词库, ${words?.length} 个单词, ${studyRecords?.length} 条记录, ${settings?.length} 个设置, ${tags?.length} 个标签, ${wordTags?.length} 个单词标签关联。`);
 
   // 在写入前，打开“静音开关”
   setSyncingFromRealtime(true);
   try {
-    await db.transaction('rw', db.wordLibraries, db.words, db.studyRecords, db.settings, async () => {
+    await db.transaction('rw', [db.wordLibraries, db.words, db.studyRecords, db.settings, db.tags, db.wordTags], async () => {
       console.log("清空本地数据表...");
       await Promise.all([
         db.wordLibraries.clear(),
         db.words.clear(),
         db.studyRecords.clear(),
         db.settings.clear(),
+        db.tags.clear(),
+        db.wordTags.clear(),
       ]);
 
       console.log("批量写入新数据到本地...");
@@ -95,6 +117,8 @@ async function performSync(): Promise<string> {
         db.words.bulkPut(words || []),
         db.studyRecords.bulkPut(studyRecords || []),
         db.settings.bulkPut(settings || []),
+        db.tags.bulkPut(tags || []),
+        db.wordTags.bulkPut(wordTags || []),
       ]);
     });
   } finally {
@@ -140,6 +164,8 @@ const tableNameMap = {
   studyRecords: 'study_records',
   wordLibraries: 'word_libraries',
   settings: 'settings',
+  tags: 'tags',
+  wordTags: 'word_tags',
 };
 
 let isSyncing = false;
@@ -153,7 +179,7 @@ export async function processSyncQueue() {
   const supabase = createClient();
 
   try {
-    const pendingTasks = await db.syncQueue.where('status').equals('pending').toArray();
+    let pendingTasks = await db.syncQueue.where('status').equals('pending').toArray();
     if (pendingTasks.length === 0) {
       isSyncing = false;
       return;
@@ -161,38 +187,84 @@ export async function processSyncQueue() {
 
     console.log(`开始处理同步队列，共 ${pendingTasks.length} 个任务。`);
 
-    for (const task of pendingTasks) {
-      try {
-        await db.syncQueue.update(task.id!, { status: 'syncing' });
+    const MAX_ATTEMPTS_PER_CYCLE = 3;
+    let attempts = 0;
 
-        let error;
-        const supabaseTableName = tableNameMap[task.tableName];
-        if (!supabaseTableName) {
-          throw new Error(`未知的表名: ${task.tableName}`);
+    while (pendingTasks.length > 0 && attempts < MAX_ATTEMPTS_PER_CYCLE) {
+      attempts++;
+      console.log(`同步周期尝试 #${attempts}`);
+      let failedTasksInCycle = [];
+
+      // 定义操作的优先级顺序
+      const priority: (typeof pendingTasks[0]['tableName'])[] = [
+        'wordLibraries', 'tags', 'words', 'studyRecords', 'wordTags', 'settings'
+      ];
+      
+      // 排序，优先处理删除（按相反顺序），然后是创建/更新
+      pendingTasks.sort((a, b) => {
+        if (a.operation === 'delete' && b.operation !== 'delete') return -1;
+        if (a.operation !== 'delete' && b.operation === 'delete') return 1;
+
+        const aPrio = priority.indexOf(a.tableName);
+        const bPrio = priority.indexOf(b.tableName);
+        
+        if (a.operation === 'delete') { // 删除按反向优先级
+          return bPrio - aPrio;
         }
+        return aPrio - bPrio; // 创建/更新按正向优先级
+      });
 
-        switch (task.operation) {
-          case 'insert':
-            ({ error } = await supabase.from(supabaseTableName).insert(toSnakeCase(task.payload)));
-            break;
-          case 'update':
-            ({ error } = await supabase.from(supabaseTableName).update(toSnakeCase(task.payload.changes)).eq('id', task.payload.id));
-            break;
-          case 'delete':
-            ({ error } = await supabase.from(supabaseTableName).delete().eq('id', task.payload.id));
-            break;
+      for (const task of pendingTasks) {
+        try {
+          await db.syncQueue.update(task.id!, { status: 'syncing' });
+
+          let error;
+          const supabaseTableName = tableNameMap[task.tableName];
+          if (!supabaseTableName) throw new Error(`未知的表名: ${task.tableName}`);
+
+          switch (task.operation) {
+            case 'insert':
+              if (supabaseTableName === 'word_tags') {
+                ({ error } = await supabase.from(supabaseTableName).upsert(toSnakeCase(task.payload), { onConflict: 'word_id,tag_id', ignoreDuplicates: false }));
+              } else {
+                ({ error } = await supabase.from(supabaseTableName).insert(toSnakeCase(task.payload)));
+              }
+              break;
+            case 'update':
+              ({ error } = await supabase.from(supabaseTableName).update(toSnakeCase(task.payload.changes)).eq('id', task.payload.id));
+              break;
+            case 'delete':
+              ({ error } = await supabase.from(supabaseTableName).delete().eq('id', task.payload.id));
+              break;
+          }
+
+          if (error) {
+            // 如果是外键约束错误，我们认为是可恢复的，将其放入失败列表以便重试
+            if (error.code === '23503') {
+              console.warn(`任务 #${task.id} 暂时失败 (外键约束)，将在本周期内重试。`, task);
+              failedTasksInCycle.push(task);
+              await db.syncQueue.update(task.id!, { status: 'pending' }); // 重置回pending
+            } else {
+              throw error; // 其他错误直接抛出
+            }
+          } else {
+            await db.syncQueue.delete(task.id!);
+            console.log(`任务 #${task.id} (${task.operation} on ${supabaseTableName}) 同步成功。`);
+          }
+
+        } catch (error) {
+          await db.syncQueue.update(task.id!, { status: 'failed', attempts: task.attempts + 1 });
+          console.error(`任务 #${task.id} 同步失败:`, task, error);
         }
-
-        if (error) throw error;
-
-        await db.syncQueue.delete(task.id!);
-        console.log(`任务 #${task.id} (${task.operation} on ${supabaseTableName}) 同步成功。`);
-
-      } catch (error) {
-        await db.syncQueue.update(task.id!, { status: 'failed', attempts: task.attempts + 1 });
-        console.error(`任务 #${task.id} 同步失败:`, task, error);
       }
+      
+      pendingTasks = failedTasksInCycle; // 下一轮循环只处理本轮失败的任务
     }
+
+    if (pendingTasks.length > 0) {
+      console.error(`经过 ${MAX_ATTEMPTS_PER_CYCLE} 次尝试后，仍有 ${pendingTasks.length} 个任务无法完成。`);
+    }
+
   } finally {
     isSyncing = false;
   }
