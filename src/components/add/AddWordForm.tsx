@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
+import { WordTagsEditor } from "@/components/library/WordTagsEditor";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AddWordFormProps {
   initialData?: Word;
@@ -149,6 +151,18 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
           placeholder="支持多个例句，请用换行分隔"
         />
       </div>
+
+      {isEditMode && initialData && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">标签</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <WordTagsEditor wordId={initialData.id} />
+          </CardContent>
+        </Card>
+      )}
+
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? "保存中..." : (isEditMode ? "更新单词" : "保存单词")}
       </Button>

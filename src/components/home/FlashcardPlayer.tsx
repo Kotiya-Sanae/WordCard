@@ -1,12 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, StudyRecord, Word } from "@/lib/db";
+import { db, StudyRecord, Word, Tag } from "@/lib/db";
 import { srs, Rating } from "@/lib/srs";
 import { Flashcard } from "./Flashcard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Filter } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface ReviewItem {
   word: Word;
@@ -16,6 +28,8 @@ interface ReviewItem {
 export function FlashcardPlayer() {
   const [learnedTodayIds, setLearnedTodayIds] = useState<Set<string>>(new Set());
   const [goalReached, setGoalReached] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // 1. 获取每日目标
   const dailyGoal = useLiveQuery(
@@ -23,13 +37,44 @@ export function FlashcardPlayer() {
     []
   );
 
-  // 2. 获取今天需要复习的单词
+  // 2. 获取所有标签
+  const allTags = useLiveQuery(() => db.tags.toArray(), []);
+
+  // 3. 获取今天需要复习的单词
   const reviewQueue = useLiveQuery(async () => {
     const now = new Date();
-    const recordsToReview = await db.studyRecords
-      .where('dueDate')
-      .belowOrEqual(now)
-      .toArray();
+    let recordsToReview: StudyRecord[];
+
+    if (selectedTagIds.length > 0) {
+      // 按标签筛选
+      const wordIdsWithTags = new Set<string>();
+      const wordTags = await db.wordTags.where('tagId').anyOf(selectedTagIds).toArray();
+      
+      // 如果选择了多个标签，需要找到同时拥有这些标签的单词
+      const wordTagCount = new Map<string, number>();
+      wordTags.forEach(wt => {
+        wordTagCount.set(wt.wordId, (wordTagCount.get(wt.wordId) || 0) + 1);
+      });
+
+      wordTagCount.forEach((count, wordId) => {
+        if (count === selectedTagIds.length) {
+          wordIdsWithTags.add(wordId);
+        }
+      });
+      
+      if (wordIdsWithTags.size === 0) return []; // 没有匹配的单词
+
+      recordsToReview = await db.studyRecords
+        .where('dueDate').belowOrEqual(now)
+        .and(record => wordIdsWithTags.has(record.wordId))
+        .toArray();
+    } else {
+      // 不筛选
+      recordsToReview = await db.studyRecords
+        .where('dueDate')
+        .belowOrEqual(now)
+        .toArray();
+    }
     
     const wordsToReview: ReviewItem[] = [];
     for (const record of recordsToReview) {
@@ -39,7 +84,7 @@ export function FlashcardPlayer() {
       }
     }
     return wordsToReview;
-  }, []);
+  }, [selectedTagIds]);
 
   // 3. 处理用户反馈
   const handleRating = async (rating: Rating) => {
@@ -74,19 +119,83 @@ export function FlashcardPlayer() {
     return () => clearInterval(timer);
   }, []);
 
+  const selectedTags = useMemo(() => {
+    if (!allTags) return [];
+    return allTags.filter(tag => selectedTagIds.includes(tag.id));
+  }, [allTags, selectedTagIds]);
 
   if (!reviewQueue || dailyGoal === undefined) {
     return <div>加载学习队列中...</div>;
   }
 
   if (reviewQueue.length === 0) {
-    return <div>今日任务已完成！🎉</div>;
+    return (
+      <div className="text-center p-4">
+        <p className="mb-4">今日任务已完成！🎉</p>
+        {selectedTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 justify-center items-center">
+            <span className="text-sm text-muted-foreground">当前筛选:</span>
+            {selectedTags.map(tag => (
+              <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
+            ))}
+            <Button variant="link" size="sm" onClick={() => setSelectedTagIds([])}>清空筛选</Button>
+          </div>
+        )}
+      </div>
+    );
   }
 
   const currentItem = reviewQueue[0];
 
   return (
     <div className="w-full flex flex-col items-center justify-center p-4">
+      <div className="w-full flex justify-end mb-2">
+        <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Filter className="h-5 w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>按标签筛选</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 py-4">
+              {allTags && allTags.length > 0 ? (
+                allTags.map(tag => (
+                  <div key={tag.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`filter-tag-${tag.id}`}
+                      checked={selectedTagIds.includes(tag.id)}
+                      onCheckedChange={(checked) => {
+                        setSelectedTagIds(prev =>
+                          checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
+                        );
+                      }}
+                    />
+                    <Label htmlFor={`filter-tag-${tag.id}`}>{tag.name}</Label>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">没有可用的标签。</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setIsFilterOpen(false)}>完成</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {selectedTags.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2 justify-center">
+          <span className="text-sm text-muted-foreground">筛选中:</span>
+          {selectedTags.map(tag => (
+            <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
+          ))}
+        </div>
+      )}
+
       <Flashcard
         word={currentItem.word.term}
         phonetics={currentItem.word.phonetics || []}

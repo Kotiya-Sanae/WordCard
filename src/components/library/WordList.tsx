@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, Word, StudyRecord, WordStatus } from "@/lib/db";
+import { db, Word, StudyRecord, WordStatus, Tag } from "@/lib/db";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +40,7 @@ import { toast } from "sonner";
 
 interface EnrichedWord extends Word {
   record: StudyRecord | undefined;
+  tags: Tag[];
 }
 
 interface WordListItemProps {
@@ -131,10 +133,17 @@ function WordListItem({ item, isMultiSelectMode, isSelected, onSelect }: WordLis
           <CardContent>
             <p className="text-sm text-muted-foreground">
               {item.definitions?.[0] || "暂无释义"}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+           </p>
+           {item.tags.length > 0 && (
+             <div className="mt-2 flex flex-wrap gap-2">
+               {item.tags.map(tag => (
+                 <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
+               ))}
+             </div>
+           )}
+         </CardContent>
+       </Card>
+     </div>
 
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
@@ -171,21 +180,42 @@ export function WordList() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
 
-  const words = useLiveQuery(async () => {
+  const wordsData = useLiveQuery(async () => {
     const allWords = await db.words.toArray();
     const allRecords = await db.studyRecords.toArray();
+    const allTags = await db.tags.toArray();
+    const allWordTags = await db.wordTags.toArray();
+
     const recordsMap = new Map(allRecords.map(r => [r.wordId, r]));
+    const tagsMap = new Map(allTags.map(t => [t.id, t]));
+    
+    const wordIdToTagsMap = new Map<string, Tag[]>();
+    allWordTags.forEach(wt => {
+      const tag = tagsMap.get(wt.tagId);
+      if (tag) {
+        if (!wordIdToTagsMap.has(wt.wordId)) {
+          wordIdToTagsMap.set(wt.wordId, []);
+        }
+        wordIdToTagsMap.get(wt.wordId)!.push(tag);
+      }
+    });
 
     const enrichedWords: EnrichedWord[] = allWords.map(word => ({
       ...word,
       record: recordsMap.get(word.id),
+      tags: wordIdToTagsMap.get(word.id) || [],
     }));
 
+    return enrichedWords;
+  }, []);
+
+  const words = useMemo(() => {
+    if (!wordsData) return undefined;
     if (filter === "all") {
-      return enrichedWords;
+      return wordsData;
     }
-    return enrichedWords.filter(item => item.record?.status === filter);
-  }, [filter]);
+    return wordsData.filter(item => item.record?.status === filter);
+  }, [wordsData, filter]);
 
   const handleToggleMultiSelect = () => {
     setIsMultiSelectMode(!isMultiSelectMode);
