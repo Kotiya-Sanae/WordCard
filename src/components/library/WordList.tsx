@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -31,10 +32,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Pencil, Tags } from "lucide-react";
+import { MoreHorizontal, Trash2, Pencil, Tags, ClipboardList, X, Filter } from "lucide-react";
 import { WordTagsEditor } from "./WordTagsEditor";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -179,6 +181,8 @@ export function WordList() {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const wordsData = useLiveQuery(async () => {
     const allWords = await db.words.toArray();
@@ -211,11 +215,22 @@ export function WordList() {
 
   const words = useMemo(() => {
     if (!wordsData) return undefined;
+
+    // 1. 先按标签筛选
+    const taggedWords = selectedTagIds.length > 0
+      ? wordsData.filter(word =>
+          selectedTagIds.every(tagId =>
+            word.tags.some(tag => tag.id === tagId)
+          )
+        )
+      : wordsData;
+
+    // 2. 再按状态筛选
     if (filter === "all") {
-      return wordsData;
+      return taggedWords;
     }
-    return wordsData.filter(item => item.record?.status === filter);
-  }, [wordsData, filter]);
+    return taggedWords.filter(item => item.record?.status === filter);
+  }, [wordsData, filter, selectedTagIds]);
 
   const handleToggleMultiSelect = () => {
     setIsMultiSelectMode(!isMultiSelectMode);
@@ -271,20 +286,84 @@ export function WordList() {
     return result;
   }, [wordsData]);
 
+  const allTags = useLiveQuery(() => db.tags.toArray(), []);
+  const selectedTags = useMemo(() => {
+    if (!allTags) return [];
+    return allTags.filter(tag => selectedTagIds.includes(tag.id));
+  }, [allTags, selectedTagIds]);
+
   return (
     <div className="relative pb-24">
-      <div className="flex justify-between items-center mb-4">
-        <Tabs defaultValue="all" onValueChange={(value) => setFilter(value as WordStatus | "all")}>
-          <TabsList>
+      <div className="mb-4 flex flex-col gap-2">
+        {/* 第一行：状态筛选 */}
+        <Tabs defaultValue="all" onValueChange={(value) => setFilter(value as WordStatus | "all")} className="w-full">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="all">所有 ({counts.all})</TabsTrigger>
             <TabsTrigger value="new">新单词 ({counts.new})</TabsTrigger>
             <TabsTrigger value="learning">学习中 ({counts.learning})</TabsTrigger>
             <TabsTrigger value="mastered">已掌握 ({counts.mastered})</TabsTrigger>
           </TabsList>
         </Tabs>
-        <Button variant="ghost" onClick={handleToggleMultiSelect}>
-          {isMultiSelectMode ? "取消" : "选择"}
-        </Button>
+
+        {/* 第二行：标签筛选和操作按钮 */}
+        <div className="flex justify-between items-center h-9">
+          <div className="flex-1 flex items-center gap-2 overflow-hidden">
+            {selectedTags.length > 0 ? (
+              <>
+                <span className="text-sm text-muted-foreground flex-shrink-0">筛选中:</span>
+                <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar">
+                  {selectedTags.map(tag => (
+                    <Badge key={tag.id} variant="secondary" className="flex-shrink-0">{tag.name}</Badge>
+                  ))}
+                </div>
+                <Button variant="link" size="sm" onClick={() => setSelectedTagIds([])} className="h-auto p-1 text-xs flex-shrink-0">清空</Button>
+              </>
+            ) : (
+              <div /> // 空div用于占位，确保右侧按钮对齐
+            )}
+          </div>
+
+          <div className="flex items-center flex-shrink-0">
+            <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Filter className="h-5 w-5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>按标签筛选</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
+                  {allTags && allTags.length > 0 ? (
+                    allTags.map(tag => (
+                      <div key={tag.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`lib-filter-tag-${tag.id}`}
+                          checked={selectedTagIds.includes(tag.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedTagIds(prev =>
+                              checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
+                            );
+                          }}
+                        />
+                        <Label htmlFor={`lib-filter-tag-${tag.id}`}>{tag.name}</Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">没有可用的标签。</p>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button onClick={() => setIsFilterOpen(false)}>完成</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Button variant="ghost" size="icon" onClick={handleToggleMultiSelect}>
+              {isMultiSelectMode ? <X className="h-5 w-5" /> : <ClipboardList className="h-5 w-5" />}
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3">

@@ -32,6 +32,93 @@ export default function AddLibraryPage() {
       .then(data => setManifest(data));
   }, []);
 
+  const handleRestoreLibrary = async (item: ManifestItem) => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast.error("请先登录。");
+      return;
+    }
+
+    try {
+      const library = await db.wordLibraries.where('name').equals(item.name).first();
+      if (!library) {
+        toast.error("未找到本地词库记录，无法恢复。");
+        return;
+      }
+
+      const response = await fetch(item.path);
+      const data = await response.json();
+      const sourceWords = data.words;
+      
+      let wordsToRestoreCount = 0;
+      let shouldStop = false;
+
+      await db.transaction('rw', [db.words, db.studyRecords, db.tags, db.wordTags, db.syncQueue], async () => {
+        const existingWords = await db.words.where('libraryId').equals(library.id).toArray();
+        const existingWordTerms = new Set(existingWords.map(w => w.term));
+        
+        const wordsToRestore = sourceWords.filter((sw: any) => !existingWordTerms.has(sw.term));
+        wordsToRestoreCount = wordsToRestore.length;
+
+        if (wordsToRestore.length === 0) {
+          toast.info("词库完整，无需恢复。");
+          shouldStop = true;
+          return;
+        }
+
+        const tag = await db.tags.where('name').equals(item.name).first();
+        if (!tag) {
+          toast.error("未找到关联的标签，无法恢复。");
+          shouldStop = true;
+          return;
+        }
+
+        const wordsToAdd: Word[] = wordsToRestore.map((word: any) => ({
+          ...word,
+          id: uuidv4(),
+          libraryId: library.id,
+          userId: user.id,
+          createdAt: new Date(),
+          modifiedAt: new Date(),
+        }));
+
+        const recordsToAdd = wordsToAdd.map(word => ({
+          id: uuidv4(),
+          wordId: word.id,
+          userId: user.id,
+          dueDate: new Date(),
+          stability: 0,
+          difficulty: 0,
+          reviewCount: 0,
+          status: 'new' as const,
+          modifiedAt: new Date(),
+        }));
+        
+        const wordTagsToAdd = wordsToAdd.map(word => ({
+          id: uuidv4(),
+          wordId: word.id,
+          tagId: tag.id,
+          userId: user.id,
+        }));
+
+        await db.words.bulkAdd(wordsToAdd);
+        await db.studyRecords.bulkAdd(recordsToAdd);
+        await db.wordTags.bulkAdd(wordTagsToAdd);
+      });
+
+      if (shouldStop) return;
+
+      if (wordsToRestoreCount > 0) {
+        toast.success(`成功恢复了 ${wordsToRestoreCount} 个单词到 "${item.name}"`);
+      }
+
+    } catch (error) {
+      console.error("Failed to restore library:", error);
+      toast.error("恢复词库失败，请稍后重试。");
+    }
+  };
+
   const handleAddLibrary = async (item: ManifestItem) => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -127,6 +214,7 @@ export default function AddLibraryPage() {
           wordCount={item.wordCount}
           isAdded={addedLibraryNames.includes(item.name)}
           onAdd={() => handleAddLibrary(item)}
+          onRestore={() => handleRestoreLibrary(item)}
         />
       ))}
     </div>
