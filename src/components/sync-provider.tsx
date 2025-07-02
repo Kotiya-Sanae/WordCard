@@ -57,6 +57,24 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
                   }
                 });
                 break;
+              case 'tags':
+                await db.transaction('rw', db.tags, db.syncQueue, async () => {
+                  if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                    await db.tags.put(convertedRecord);
+                  } else if (eventType === 'DELETE') {
+                    await db.tags.delete(oldRecord.id);
+                  }
+                });
+                break;
+              case 'word_tags':
+                await db.transaction('rw', db.wordTags, db.syncQueue, async () => {
+                  if (eventType === 'INSERT' || eventType === 'UPDATE') {
+                    await db.wordTags.put(convertedRecord);
+                  } else if (eventType === 'DELETE') {
+                    await db.wordTags.delete(oldRecord.id);
+                  }
+                });
+                break;
             }
           } finally {
             // 确保在操作完成后，无论成功与否，都关闭“静音开关”
@@ -88,6 +106,8 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
           db.studyRecords.clear(),
           db.settings.clear(),
           db.syncQueue.clear(),
+          db.tags.clear(),
+          db.wordTags.clear(),
         ]);
         console.log("本地数据已清除。");
       }
