@@ -91,36 +91,55 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
         
         const libraryCount = await db.wordLibraries.count();
         if (libraryCount === 0) {
-          console.log("本地无词库，判定为新用户/新设备，开始创建默认数据...");
-          
-          const defaultLibraryId = crypto.randomUUID();
-          const word1Id = crypto.randomUUID();
-          const word2Id = crypto.randomUUID();
-          const word3Id = crypto.randomUUID();
-
-          await db.transaction('rw', [db.wordLibraries, db.words, db.studyRecords, db.syncQueue], async () => {
-            await db.wordLibraries.add({
-              id: defaultLibraryId,
-              userId: session.user.id,
-              name: '默认词库',
-              description: '您的第一个词库',
-              category: '用户',
-              createdAt: new Date(),
-            });
-
-            await db.words.bulkAdd([
-              { id: word1Id, libraryId: defaultLibraryId, userId: session.user.id, term: 'ephemeral', phonetics: ['/ɪˈfɛm(ə)rəl/'], definitions: ['adj. 短暂的, 瞬息的'], examples: ['The ephemeral beauty of the cherry blossoms.'], createdAt: new Date(), modifiedAt: new Date() },
-              { id: word2Id, libraryId: defaultLibraryId, userId: session.user.id, term: 'serendipity', phonetics: ['/ˌsɛrənˈdɪpɪti/'], definitions: ['n. 意外发现美好事物的能力'], examples: ['We all have experienced the serendipity of relevant information.'], createdAt: new Date(), modifiedAt: new Date() },
-              { id: word3Id, libraryId: defaultLibraryId, userId: session.user.id, term: 'eloquent', phonetics: ['/ˈɛləkwənt/'], definitions: ['adj. 雄辩的，有口才的'], examples: ['An eloquent speech.'], createdAt: new Date(), modifiedAt: new Date() },
-            ]);
-
-            await db.studyRecords.bulkAdd([
-              { id: crypto.randomUUID(), userId: session.user.id, wordId: word1Id, dueDate: new Date(), stability: 0, difficulty: 0, reviewCount: 0, status: 'new', modifiedAt: new Date() },
-              { id: crypto.randomUUID(), userId: session.user.id, wordId: word2Id, dueDate: new Date(), stability: 0, difficulty: 0, reviewCount: 0, status: 'new', modifiedAt: new Date() },
-              { id: crypto.randomUUID(), userId: session.user.id, wordId: word3Id, dueDate: new Date(), stability: 0, difficulty: 0, reviewCount: 0, status: 'new', modifiedAt: new Date() },
-            ]);
+          let isCreationInProgress = false;
+          await db.transaction('rw', db.settings, async () => {
+            const lock = await db.settings.get('creatingDefaultData');
+            if (lock) {
+              isCreationInProgress = true;
+              return;
+            }
+            await db.settings.put({ key: 'creatingDefaultData', value: true });
           });
-          console.log("默认数据创建成功，将通过上行同步推送到云端。");
+
+          if (isCreationInProgress) {
+            console.log("默认数据创建正在进行中，跳过本次操作。");
+            return;
+          }
+
+          try {
+            console.log("本地无词库，判定为新用户/新设备，开始创建默认数据...");
+            const defaultLibraryId = crypto.randomUUID();
+            const word1Id = crypto.randomUUID();
+            const word2Id = crypto.randomUUID();
+            const word3Id = crypto.randomUUID();
+
+            await db.transaction('rw', [db.wordLibraries, db.words, db.studyRecords, db.syncQueue], async () => {
+              await db.wordLibraries.add({
+                id: defaultLibraryId,
+                userId: session.user.id,
+                name: '默认词库',
+                description: '您的第一个词库',
+                category: '用户',
+                createdAt: new Date(),
+              });
+
+              await db.words.bulkAdd([
+                { id: word1Id, libraryId: defaultLibraryId, userId: session.user.id, term: 'ephemeral', phonetics: ['/ɪˈfɛm(ə)rəl/'], definitions: ['adj. 短暂的, 瞬息的'], examples: ['The ephemeral beauty of the cherry blossoms.'], createdAt: new Date(), modifiedAt: new Date() },
+                { id: word2Id, libraryId: defaultLibraryId, userId: session.user.id, term: 'serendipity', phonetics: ['/ˌsɛrənˈdɪpɪti/'], definitions: ['n. 意外发现美好事物的能力'], examples: ['We all have experienced the serendipity of relevant information.'], createdAt: new Date(), modifiedAt: new Date() },
+                { id: word3Id, libraryId: defaultLibraryId, userId: session.user.id, term: 'eloquent', phonetics: ['/ˈɛləkwənt/'], definitions: ['adj. 雄辩的，有口才的'], examples: ['An eloquent speech.'], createdAt: new Date(), modifiedAt: new Date() },
+              ]);
+
+              await db.studyRecords.bulkAdd([
+                { id: crypto.randomUUID(), userId: session.user.id, wordId: word1Id, dueDate: new Date(), stability: 0, difficulty: 0, reviewCount: 0, status: 'new', modifiedAt: new Date() },
+                { id: crypto.randomUUID(), userId: session.user.id, wordId: word2Id, dueDate: new Date(), stability: 0, difficulty: 0, reviewCount: 0, status: 'new', modifiedAt: new Date() },
+                { id: crypto.randomUUID(), userId: session.user.id, wordId: word3Id, dueDate: new Date(), stability: 0, difficulty: 0, reviewCount: 0, status: 'new', modifiedAt: new Date() },
+              ]);
+            });
+            console.log("默认数据创建成功，将通过上行同步推送到云端。");
+          } finally {
+            // 无论成功与否，都释放锁
+            await db.settings.delete('creatingDefaultData');
+          }
         } else {
           const lastSync = await db.settings.get('lastSyncTimestamp');
           if (!lastSync) {
