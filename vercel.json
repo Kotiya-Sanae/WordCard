@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/logo.png",
+      "destination": "https://rvgwpcrqrfheqtxlaxzy.supabase.co/storage/v1/object/public/public-images//002.png"
+    }
+  ]
+}
