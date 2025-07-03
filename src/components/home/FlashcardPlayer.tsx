@@ -19,6 +19,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ReviewItem {
   word: Word;
@@ -30,6 +31,7 @@ export function FlashcardPlayer() {
   const [goalReached, setGoalReached] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [tagFilterLogic, setTagFilterLogic] = useState<'AND' | 'OR'>('AND');
 
   // 1. 获取每日目标
   const dailyGoal = useLiveQuery(
@@ -46,27 +48,33 @@ export function FlashcardPlayer() {
     let recordsToReview: StudyRecord[];
 
     if (selectedTagIds.length > 0) {
-      // 按标签筛选
-      const wordIdsWithTags = new Set<string>();
-      const wordTags = await db.wordTags.where('tagId').anyOf(selectedTagIds).toArray();
-      
-      // 如果选择了多个标签，需要找到同时拥有这些标签的单词
-      const wordTagCount = new Map<string, number>();
-      wordTags.forEach(wt => {
-        wordTagCount.set(wt.wordId, (wordTagCount.get(wt.wordId) || 0) + 1);
+      const allWordTags = await db.wordTags.toArray();
+      const wordIdToTags = new Map<string, string[]>();
+      allWordTags.forEach(wt => {
+        if (!wordIdToTags.has(wt.wordId)) {
+          wordIdToTags.set(wt.wordId, []);
+        }
+        wordIdToTags.get(wt.wordId)!.push(wt.tagId);
       });
 
-      wordTagCount.forEach((count, wordId) => {
-        if (count === selectedTagIds.length) {
-          wordIdsWithTags.add(wordId);
+      const filteredWordIds = new Set<string>();
+      wordIdToTags.forEach((tags, wordId) => {
+        let match = false;
+        if (tagFilterLogic === 'AND') {
+          match = selectedTagIds.every(tagId => tags.includes(tagId));
+        } else { // OR logic
+          match = selectedTagIds.some(tagId => tags.includes(tagId));
+        }
+        if (match) {
+          filteredWordIds.add(wordId);
         }
       });
-      
-      if (wordIdsWithTags.size === 0) return []; // 没有匹配的单词
+
+      if (filteredWordIds.size === 0) return [];
 
       recordsToReview = await db.studyRecords
         .where('dueDate').belowOrEqual(now)
-        .and(record => wordIdsWithTags.has(record.wordId))
+        .and(record => filteredWordIds.has(record.wordId))
         .toArray();
     } else {
       // 不筛选
@@ -84,7 +92,7 @@ export function FlashcardPlayer() {
       }
     }
     return wordsToReview;
-  }, [selectedTagIds]);
+  }, [selectedTagIds, tagFilterLogic]);
 
   // 3. 处理用户反馈
   const handleRating = async (rating: Rating) => {
@@ -158,27 +166,45 @@ export function FlashcardPlayer() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>按标签筛选</DialogTitle>
+              <DialogTitle>筛选</DialogTitle>
             </DialogHeader>
-            <div className="space-y-3 py-4">
-              {allTags && allTags.length > 0 ? (
-                allTags.map(tag => (
-                  <div key={tag.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`filter-tag-${tag.id}`}
-                      checked={selectedTagIds.includes(tag.id)}
-                      onCheckedChange={(checked) => {
-                        setSelectedTagIds(prev =>
-                          checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
-                        );
-                      }}
-                    />
-                    <Label htmlFor={`filter-tag-${tag.id}`}>{tag.name}</Label>
+            <div className="py-4 space-y-6">
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium">标签筛选逻辑</h4>
+                <RadioGroup value={tagFilterLogic} onValueChange={(value: 'AND' | 'OR') => setTagFilterLogic(value)}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="AND" id="f-logic-and" />
+                    <Label htmlFor="f-logic-and">满足所有已选标签 (AND)</Label>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">没有可用的标签。</p>
-              )}
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="OR" id="f-logic-or" />
+                    <Label htmlFor="f-logic-or">满足任一已选标签 (OR)</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium">选择标签</h4>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {allTags && allTags.length > 0 ? (
+                    allTags.map(tag => (
+                      <div key={tag.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`filter-tag-${tag.id}`}
+                          checked={selectedTagIds.includes(tag.id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedTagIds(prev =>
+                              checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
+                            );
+                          }}
+                        />
+                        <Label htmlFor={`filter-tag-${tag.id}`}>{tag.name}</Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">没有可用的标签。</p>
+                  )}
+                </div>
+              </div>
             </div>
             <DialogFooter>
               <Button onClick={() => setIsFilterOpen(false)}>完成</Button>

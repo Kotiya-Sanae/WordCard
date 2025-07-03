@@ -31,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Trash2, Pencil, Tags, ClipboardList, X, Filter } from "lucide-react";
 import { WordTagsEditor } from "./WordTagsEditor";
@@ -183,6 +184,7 @@ export function WordList() {
   const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [tagFilterLogic, setTagFilterLogic] = useState<'AND' | 'OR'>('AND');
 
   const wordsData = useLiveQuery(async () => {
     const allWords = await db.words.toArray();
@@ -218,11 +220,17 @@ export function WordList() {
 
     // 1. 先按标签筛选
     const taggedWords = selectedTagIds.length > 0
-      ? wordsData.filter(word =>
-          selectedTagIds.every(tagId =>
-            word.tags.some(tag => tag.id === tagId)
-          )
-        )
+      ? wordsData.filter(word => {
+          if (tagFilterLogic === 'AND') {
+            return selectedTagIds.every(tagId =>
+              word.tags.some(tag => tag.id === tagId)
+            );
+          } else { // OR logic
+            return selectedTagIds.some(tagId =>
+              word.tags.some(tag => tag.id === tagId)
+            );
+          }
+        })
       : wordsData;
 
     // 2. 再按状态筛选
@@ -230,7 +238,7 @@ export function WordList() {
       return taggedWords;
     }
     return taggedWords.filter(item => item.record?.status === filter);
-  }, [wordsData, filter, selectedTagIds]);
+  }, [wordsData, filter, selectedTagIds, tagFilterLogic]);
 
   const handleToggleMultiSelect = () => {
     setIsMultiSelectMode(!isMultiSelectMode);
@@ -332,27 +340,45 @@ export function WordList() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>按标签筛选</DialogTitle>
+                  <DialogTitle>筛选</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
-                  {allTags && allTags.length > 0 ? (
-                    allTags.map(tag => (
-                      <div key={tag.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`lib-filter-tag-${tag.id}`}
-                          checked={selectedTagIds.includes(tag.id)}
-                          onCheckedChange={(checked) => {
-                            setSelectedTagIds(prev =>
-                              checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
-                            );
-                          }}
-                        />
-                        <Label htmlFor={`lib-filter-tag-${tag.id}`}>{tag.name}</Label>
+                <div className="py-4 space-y-6">
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">标签筛选逻辑</h4>
+                    <RadioGroup value={tagFilterLogic} onValueChange={(value: 'AND' | 'OR') => setTagFilterLogic(value)}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="AND" id="logic-and" />
+                        <Label htmlFor="logic-and">满足所有已选标签 (AND)</Label>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">没有可用的标签。</p>
-                  )}
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="OR" id="logic-or" />
+                        <Label htmlFor="logic-or">满足任一已选标签 (OR)</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">选择标签</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {allTags && allTags.length > 0 ? (
+                        allTags.map(tag => (
+                          <div key={tag.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`lib-filter-tag-${tag.id}`}
+                              checked={selectedTagIds.includes(tag.id)}
+                              onCheckedChange={(checked) => {
+                                setSelectedTagIds(prev =>
+                                  checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
+                                );
+                              }}
+                            />
+                            <Label htmlFor={`lib-filter-tag-${tag.id}`}>{tag.name}</Label>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">没有可用的标签。</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button onClick={() => setIsFilterOpen(false)}>完成</Button>
