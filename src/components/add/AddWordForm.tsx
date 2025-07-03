@@ -110,7 +110,8 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
             id: crypto.randomUUID(),
             wordId: newWordId,
             userId: user.id,
-            dueDate: new Date(),
+            // 确保 due_date 不会是未来的时间，减去1秒作为缓冲
+            dueDate: new Date(Date.now() - 1000),
             stability: 0,
             difficulty: 0,
             reviewCount: 0,
