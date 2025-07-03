@@ -81,7 +81,16 @@ async function performSync(): Promise<string> {
     userId: s.user_id,
   }));
 
-  const tags = tagsRes.data?.map((t: any) => ({
+  const rawTags = tagsRes.data || [];
+  const uniqueTagsMap = new Map<string, typeof rawTags[0]>();
+  rawTags.forEach((t: any) => {
+    // 使用 toLowerCase() 来处理潜在的大小写不一致问题
+    const lowerCaseName = t.name.toLowerCase();
+    if (!uniqueTagsMap.has(lowerCaseName)) {
+      uniqueTagsMap.set(lowerCaseName, t);
+    }
+  });
+  const tags = Array.from(uniqueTagsMap.values()).map((t: any) => ({
     id: t.id,
     name: t.name,
     createdAt: new Date(t.created_at),
