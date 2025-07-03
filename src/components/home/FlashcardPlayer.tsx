@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, StudyRecord, Word, Tag } from "@/lib/db";
+import { useRefreshStore } from "@/lib/stores/refreshStore";
 import { srs, Rating } from "@/lib/srs";
 import { Flashcard } from "./Flashcard";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ export function FlashcardPlayer() {
 
   // 2. 获取所有标签
   const allTags = useLiveQuery(() => db.tags.toArray(), []);
+  const refresher = useRefreshStore((state) => state.refresher);
 
   // 3. 获取今天需要复习的单词
   const reviewQueue = useLiveQuery(async () => {
@@ -92,7 +94,7 @@ export function FlashcardPlayer() {
       }
     }
     return wordsToReview;
-  }, [selectedTagIds, tagFilterLogic]);
+  }, [selectedTagIds, tagFilterLogic, refresher]);
 
   // 3. 处理用户反馈
   const handleRating = async (rating: Rating) => {

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useRefreshStore } from "@/lib/stores/refreshStore";
 import { createClient } from "@/utils/supabase/client";
 import { WordTagsEditor } from "@/components/library/WordTagsEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,7 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
   const router = useRouter();
   const allTags = useLiveQuery(() => db.tags.toArray(), []);
+  const triggerRefresh = useRefreshStore((state) => state.triggerRefresh);
 
   const isEditMode = !!initialData;
 
@@ -106,17 +108,17 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
           });
 
           // 2. 添加学习记录
+          const now = new Date();
           await db.studyRecords.add({
             id: crypto.randomUUID(),
             wordId: newWordId,
             userId: user.id,
-            // 确保 due_date 不会是未来的时间，减去1秒作为缓冲
-            dueDate: new Date(Date.now() - 1000),
+            dueDate: now,
             stability: 0,
             difficulty: 0,
             reviewCount: 0,
             status: 'new',
-            modifiedAt: new Date(),
+            modifiedAt: now,
           });
 
           // 3. 添加标签关联
@@ -131,6 +133,7 @@ export function AddWordForm({ initialData }: AddWordFormProps) {
           }
         });
         toast.success("单词添加成功！");
+        triggerRefresh(); // 触发刷新
         router.push('/library');
       }
     } catch (error) {
