@@ -21,7 +21,7 @@ export default function AddLayout({
 
   return (
     <div className="flex flex-col h-full">
-      <Header title="添加内容" showBackButton />
+      <Header title="添加内容" />
       <div className="px-4 mt-4">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2">

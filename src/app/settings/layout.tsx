@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
 import { useMemo } from "react";
+import { Header } from "@/components/layout/Header";
 
 const titleMap: Record<string, string> = {
   "/settings": "设置",
@@ -26,14 +25,11 @@ export default function SettingsLayout({
   const title = useMemo(() => titleMap[pathname] ?? "设置", [pathname]);
 
   return (
-    <div>
-      <header className="p-4 border-b flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <h1 className="text-xl font-bold">{title}</h1>
-      </header>
-      {children}
+    <div className="flex flex-col h-full">
+      <Header title={title} showBackButton />
+      <div className="flex-1 overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }
