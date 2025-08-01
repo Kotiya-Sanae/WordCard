@@ -50,13 +50,6 @@ pnpm build && pnpm start
 
 The app can be installed as a PWA in modern browsers. A service worker is registered and a web app manifest is provided.
 
-## 🗂️ Key Paths
-
-- App Router: [`typescript.file`](src/app/page.tsx:1), [`typescript.file`](src/app/library/[id]/edit/page.tsx:1), [`typescript.file`](src/app/settings/layout.tsx:1)  
-- Components: [`typescript.file`](src/components/home/Flashcard.tsx:1), [`typescript.file`](src/components/add/AddWordForm.tsx:1), [`typescript.file`](src/components/stats/MasteryPieChart.tsx:1), [`typescript.file`](src/components/layout/BottomNav.tsx:1)  
-- Data & Sync: [`typescript.file`](src/lib/db.ts:1), [`typescript.file`](src/lib/srs.ts:1), [`typescript.file`](src/lib/sync.ts:1), [`typescript.file`](src/lib/sync-manager.ts:1)  
-- Supabase: [`typescript.file`](src/utils/supabase/client.ts:1), [`typescript.file`](src/utils/supabase/server.ts:1)  
-- PWA: [`typescript.file`](src/app/manifest.ts:1), [`typescript.file`](public/sw.js:1)
 
 ## 📌 Status
 
