@@ -2,7 +2,13 @@
 
 WordCard is a modern, mobile‑first web app that helps you learn and retain vocabulary using a practical spaced repetition system (SRS) and smooth flashcard flipping. Built as a Progressive Web App (PWA), it delivers instant interactions offline and syncs seamlessly when you’re online.
 
-## ✨ Highlights
+## Screenshots
+![首页](https://github.com/Kotiya-Sanae/WordCard/raw/main/public/screenshots/1.png)
+![词库](https://github.com/Kotiya-Sanae/WordCard/raw/main/public/screenshots/2.png)
+![添加](https://github.com/Kotiya-Sanae/WordCard/raw/main/public/screenshots/3.png)
+![统计](https://github.com/Kotiya-Sanae/WordCard/raw/main/public/screenshots/4.png)
+
+## Highlights
 
 - Local‑First Architecture: All daily reads/writes go to a fast client DB (IndexedDB via Dexie) for instant UX and full offline capability.
 - Smart SRS Loop: A focused spaced repetition flow designed for consistency and long‑term retention.
@@ -11,7 +17,7 @@ WordCard is a modern, mobile‑first web app that helps you learn and retain voc
 - Mobile‑Ready UI: Shadcn UI + Tailwind v4 + Lucide icons, dark mode, toasts, and bottom navigation.
 - Useful Stats: Progress overview and mastery distribution charts (Recharts).
 
-## 🧰 Tech Stack
+## Tech Stack
 
 - Framework: Next.js 15 (App Router) + React 19  
 - Styling & UI: Tailwind CSS v4, Shadcn UI, Sonner (toast), Lucide React  
@@ -21,7 +27,7 @@ WordCard is a modern, mobile‑first web app that helps you learn and retain voc
 - Backend/BaaS: Supabase (Auth via `@supabase/ssr`, PostgreSQL with RLS)  
 - PWA: Web App Manifest + Service Worker for installability and caching
 
-## 🚀 Quick Start
+## Quick Start
 
 1) Install
 ```bash
@@ -51,10 +57,10 @@ pnpm build && pnpm start
 The app can be installed as a PWA in modern browsers. A service worker is registered and a web app manifest is provided.
 
 
-## 📌 Status
+## Status
 
 Core features (SRS study loop, CRUD with batch operations, stats, settings) and Supabase sync (auth, first‑time pull, incremental push, real‑time) are implemented. PWA caching and offline usage are functional for the app shell and local data; further tuning can be added as needed.
 
-## 📄 License
+## License
 
 MIT — Feel free to learn, fork, and build on top of this project.
